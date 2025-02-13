@@ -2,7 +2,7 @@
 
 MovieHUB is a powerful and feature-rich movie and TV show streaming platform built with Node.js and Express. It provides a seamless experience for users to watch their favorite movies and TV shows online.
 
-![MovieHUB Screenshot](screenshots/home.png)
+![MovieHUB Screenshot](screenshots/home.jpg)
 
 ## Features ✨
 
@@ -30,7 +30,7 @@ MovieHUB is a powerful and feature-rich movie and TV show streaming platform bui
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/moviehub.git
+   git clone https://https://github.com/Akar1881/MovieHUB.git
    cd moviehub
    ```
 
@@ -150,16 +150,16 @@ moviehub/
 ## Screenshots 📸
 
 ### Home Page
-![Home Page](screenshots/home.png)
+![Home Page](screenshots/home.jpg)
 
 ### Movie Details
-![Movie Details](screenshots/movie.png)
+![Movie Details](screenshots/moviepage.jpg)
 
 ### TV Show Page
-![TV Show Page](screenshots/tvshow.png)
+![TV Show Page](screenshots/tvshow.jpg)
 
 ### Admin Dashboard
-![Admin Dashboard](screenshots/admin.png)
+![Admin Dashboard](screenshots/admin.jpg)
 
 ## Contributing 🤝
 
@@ -185,7 +185,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Support 💬
 
 If you have any questions or need help, please:
-1. Check the [issues](https://github.com/yourusername/moviehub/issues) page
+1. Check the [issues](https://github.com/Akar1881/MovieHUB/issues) page
 2. Create a new issue if needed
 3. Join our community discussions
 
