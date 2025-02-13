@@ -8,18 +8,57 @@
         </div>
         <div class="tvshow-info">
             <h1><%= tvshow.title %></h1>
+
+            <% if (user) { %>
+                <button id="favoriteBtn" class="favorite-btn" onclick="toggleFavorite()">
+                  <i class="fas <%= isFavorite ? 'fa-heart' : 'fa-heart-o' %>"></i>
+                  <span><%= isFavorite ? 'Remove from Favorites' : 'Add to Favorites' %></span>
+                </button>
+              <% } %>
+            
             <div class="rating-display">
+                <% const avgRating = reviews.reduce((acc, rev) => acc + rev.rating, 0) / reviews.length || 0; %>
                 <div class="rating-stars">
-                    <% const avgRating = reviews.reduce((acc, rev) => acc + rev.rating, 0) / reviews.length || 0; %>
                     <% for(let i = 1; i <= 5; i++) { %>
-                        <i class="fas fa-star<%= i <= avgRating ? '' : '-o' %>"></i>
+                        <i class="fas fa-star" style="color: <%= i <= avgRating ? '#FFD700' : '#333333' %>"></i>
                     <% } %>
+                    <span class="rating-number" style="color: #FFD700"><%= avgRating.toFixed(1) %></span>
                 </div>
-                <span class="rating-number"><%= avgRating.toFixed(1) %>/5</span>
-                <span>(<%= reviews.length %> reviews)</span>
             </div>
+
+            <div class="tvshow-meta">
+                <div class="meta-item">
+                    <span class="meta-label">Genre:</span>
+                    <span class="meta-value">
+                        <% JSON.parse(tvshow.genres).forEach((genre, index) => { %>
+                            <span class="genre-tag"><%= genre %></span>
+                            <%= index < JSON.parse(tvshow.genres).length - 1 ? ',' : '' %>
+                        <% }); %>
+                    </span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Language:</span>
+                    <span class="meta-value"><%= tvshow.language %></span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Release Date:</span>
+                    <span class="meta-value"><%= new Date(tvshow.release_date).toLocaleDateString() %></span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Runtime:</span>
+                    <span class="meta-value"><%= tvshow.runtime %> per episode</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Seasons:</span>
+                    <span class="meta-value"><%= tvshow.seasons %></span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Episodes:</span>
+                    <span class="meta-value"><%= tvshow.total_episodes %></span>
+                </div>
+            </div>
+
             <p class="tvshow-description"><%= tvshow.description %></p>
-            <p class="tvshow-seasons">Seasons: <%= tvshow.seasons %></p>
             
             <div class="tvshow-episodes">
                 <h3>Episodes</h3>
@@ -42,7 +81,7 @@
 
             <div class="tvshow-reviews">
                 <h3>Reviews</h3>
-                <% if (user) { %>
+                <% if (user && !hasReviewed) { %>
                     <form action="/tvshows/<%= tvshow.id %>/review" method="POST" class="review-form">
                         <div class="form-group">
                             <label for="rating">Rating</label>
@@ -62,30 +101,127 @@
                     </form>
                 <% } %>
 
-                <div class="reviews-container">
-                    <div class="reviews-list">
-                        <% reviews.forEach(review => { %>
-                            <div class="review">
-                                <div class="review-header">
-                                    <span class="review-author"><%= review.username %></span>
-                                    <span class="review-rating">
-                                        <% for(let i = 1; i <= 5; i++) { %>
-                                            <i class="fas fa-star<%= i <= review.rating ? '' : '-o' %>"></i>
-                                        <% } %>
-                                    </span>
-                                </div>
-                                <p class="review-comment"><%= review.comment %></p>
-                                <small class="review-date">
-                                    <%= new Date(review.created_at).toLocaleDateString() %>
-                                </small>
+                <div class="reviews-list">
+                    <% reviews.forEach(review => { %>
+                        <div class="review" id="review-<%= review.id %>">
+                            <div class="review-header">
+                                <span class="review-author"><%= review.username %></span>
+                                <span class="review-rating">
+                                    <% for(let i = 1; i <= 5; i++) { %>
+                                        <i class="fas fa-star" style="color: <%= i <= review.rating ? '#FFD700' : '#333333' %>"></i>
+                                    <% } %>
+                                </span>
+                                <% if (user && user.is_admin) { %>
+                                    <button class="delete-review-btn" onclick="deleteReview(<%= review.id %>)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                <% } %>
                             </div>
-                        <% }); %>
-                    </div>
+                            <p class="review-comment"><%= review.comment %></p>
+                            <small class="review-date">
+                                <%= new Date(review.created_at).toLocaleDateString() %>
+                            </small>
+                        </div>
+                    <% }); %>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.tvshow-meta {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+}
+
+.meta-item {
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+}
+
+.meta-label {
+    color: #FFD700;
+    font-weight: 600;
+    min-width: 120px;
+}
+
+.meta-value {
+    color: #FFFFFF;
+}
+
+.genre-tag {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background-color: rgba(255, 215, 0, 0.1);
+    border-radius: 4px;
+    margin-right: 0.5rem;
+    color: #FFD700;
+}
+
+.rating-display {
+    margin: 1rem 0;
+}
+
+.rating-stars {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.rating-number {
+    font-weight: 600;
+    margin-left: 0.5rem;
+}
+
+.favorite-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: rgba(255, 215, 0, 0.1);
+  border: 1px solid var(--primary);
+  border-radius: 4px;
+  color: var(--primary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 1rem 0;
+}
+
+.favorite-btn:hover {
+  background-color: var(--primary);
+  color: var(--secondary);
+}
+
+.favorite-btn i {
+  font-size: 1.1rem;
+}
+
+.review-header {
+    position: relative;
+}
+
+.delete-review-btn {
+    position: absolute;
+    right: 0;
+    top: 330%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #dc2626;
+    cursor: pointer;
+    padding: 0.5rem;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.delete-review-btn:hover {
+    opacity: 1;
+}
+</style>
 
 <script>
 const seasonSelect = document.getElementById('season-select');
@@ -145,6 +281,56 @@ serverSelect.addEventListener('change', function() {
         episodePlayer.style.display = 'none';
     }
 });
+
+async function toggleFavorite() {
+  const button = document.getElementById('favoriteBtn');
+  const icon = button.querySelector('i');
+  const text = button.querySelector('span');
+  const isFavorite = icon.classList.contains('fa-heart');
+  
+  try {
+    const response = await fetch(`/user/favorites/${isFavorite ? 'remove' : 'add'}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        contentId: <%= tvshow.id %>,
+        contentType: 'tvshow'
+      })
+    });
+    
+    if (response.ok) {
+      icon.classList.toggle('fa-heart');
+      icon.classList.toggle('fa-heart-o');
+      text.textContent = isFavorite ? 'Add to Favorites' : 'Remove from Favorites';
+    }
+  } catch (err) {
+    console.error('Failed to toggle favorite:', err);
+  }
+}
+
+async function deleteReview(reviewId) {
+    if (!confirm('Are you sure you want to delete this review?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/tvshows/<%= tvshow.id %>/review/${reviewId}/delete`, {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            const reviewElement = document.getElementById(`review-${reviewId}`);
+            reviewElement.remove();
+        } else {
+            alert('Failed to delete review');
+        }
+    } catch (err) {
+        console.error('Error deleting review:', err);
+        alert('Failed to delete review');
+    }
+}
 </script>
 
 <%- include('../partials/footer') %>

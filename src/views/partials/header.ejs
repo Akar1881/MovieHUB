@@ -9,38 +9,38 @@
 </head>
 <body>
     <header class="header">
-        <div class="container">
-            <nav class="nav-menu">
-                <div class="search-container">
-                    <i class="fas fa-search search-icon" id="headerSearchIcon"></i>
-                    <div class="search-bar" id="headerSearchBar">
-                        <input type="text" class="search-input" id="headerSearchInput" placeholder="Search movies and TV shows...">
-                        <div class="search-results" id="headerSearchResults">
-                            <div class="search-section">
-                                <h3>Movies</h3>
-                                <div id="headerMovieResults"></div>
-                            </div>
-                            <div class="search-section">
-                                <h3>TV Shows</h3>
-                                <div id="headerTvshowResults"></div>
-                            </div>
+        <nav class="nav-menu">
+            <div class="search-container">
+                <i class="fas fa-search search-icon" id="headerSearchIcon"></i>
+                <div class="search-bar" id="headerSearchBar">
+                    <input type="text" class="search-input" id="headerSearchInput" placeholder="Search movies and TV shows...">
+                    <div class="search-results" id="headerSearchResults">
+                        <div class="search-section">
+                            <h3>Movies</h3>
+                            <div id="headerMovieResults"></div>
+                        </div>
+                        <div class="search-section">
+                            <h3>TV Shows</h3>
+                            <div id="headerTvshowResults"></div>
                         </div>
                     </div>
                 </div>
-                <div class="logo">
-                    <a href="/">
-                        <img src="/images/logo.png" alt="<%= config.site.name %>">
-                    </a>
-                </div>
+            </div>
+            
+            <div class="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="<%= config.site.name %>">
+                </a>
+            </div>
+            
+            <div class="user-info">
                 <% if (user) { %>
-                    <span class="user-info"><%= user.username %></span>
+                    <span class="login-button"><%= user.username %></span>
                 <% } else { %>
-                    <span class="user-info">
-                        <a href="/auth/login" style="color: var(--primary); text-decoration: none;">Login</a>
-                    </span>
+                    <a href="/auth/login" class="login-button">Login</a>
                 <% } %>
-            </nav>
-        </div>
+            </div>
+        </nav>
     </header>
 
     <aside class="sidebar">

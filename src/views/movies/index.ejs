@@ -16,6 +16,15 @@
                 <option value="movie">Movies</option>
                 <option value="anime">Anime Movies</option>
             </select>
+            <select id="genre-select" class="filter-select">
+                <option value="all">All Genres</option>
+                <% ['Action', 'Comedy', 'Horror', 'Drama', 'Thriller', 'Romance', 
+                    'Sci-Fi', 'Fantasy', 'Adventure', 'Crime', 'Mystery', 'Documentary',
+                    'Animation', 'Family', 'Historical', 'Musical', 'Superhero', 
+                    'Reality TV', 'Sports', 'Art House'].forEach(genre => { %>
+                    <option value="<%= genre %>"><%= genre %></option>
+                <% }); %>
+            </select>
         </div>
     </div>
 
@@ -25,6 +34,7 @@
                  data-rating="<%= movie.avgRating || 0 %>" 
                  data-date="<%= movie.created_at %>"
                  data-type="<%= movie.type %>"
+                 data-genres="<%= movie.genres %>"
                  data-title="<%= movie.title.toLowerCase() %>">
                 <a href="/movies/<%= movie.id %>">
                     <img src="<%= movie.poster %>" alt="<%= movie.title %>">
@@ -41,26 +51,55 @@
     </div>
 </div>
 
+<style>
+.filter-select {
+    background-color: var(--secondary);
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    padding: 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+    min-width: 150px;
+}
+
+.filter-select option {
+    background-color: var(--secondary);
+    color: var(--primary);
+    padding: 0.5rem;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+}
+</style>
+
 <script>
 const searchInput = document.getElementById('page-search-input');
 const sortSelect = document.getElementById('sort-select');
 const typeSelect = document.getElementById('type-select');
+const genreSelect = document.getElementById('genre-select');
 const contentGrid = document.querySelector('.content-grid');
 
 function filterAndSortContent() {
     const searchTerm = searchInput.value.toLowerCase();
     const sortBy = sortSelect.value;
     const typeFilter = typeSelect.value;
+    const genreFilter = genreSelect.value;
     
     const movies = Array.from(contentGrid.children);
     
     movies.forEach(movie => {
         const title = movie.dataset.title;
         const type = movie.dataset.type;
-        const shouldShow = 
-            title.includes(searchTerm) && 
-            (typeFilter === 'all' || type === typeFilter);
+        const genres = JSON.parse(movie.dataset.genres || '[]');
         
+        const matchesType = typeFilter === 'all' || type === typeFilter;
+        const matchesGenre = genreFilter === 'all' || genres.includes(genreFilter);
+        const matchesSearch = title.includes(searchTerm);
+        
+        const shouldShow = matchesSearch && matchesType && matchesGenre;
         movie.style.display = shouldShow ? '' : 'none';
     });
     
@@ -82,6 +121,7 @@ function filterAndSortContent() {
 searchInput.addEventListener('input', filterAndSortContent);
 sortSelect.addEventListener('change', filterAndSortContent);
 typeSelect.addEventListener('change', filterAndSortContent);
+genreSelect.addEventListener('change', filterAndSortContent);
 </script>
 
 <%- include('../partials/footer') %>

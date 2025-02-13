@@ -22,10 +22,51 @@
       <label for="poster">Poster (1200x1809)</label>
       <input type="file" id="poster" name="poster" accept="image/jpeg,image/png">
       <small>Leave empty to keep current poster</small>
+      <% if (movie.poster) { %>
+        <div class="current-poster">
+          <img src="<%= movie.poster %>" alt="Current poster" style="max-width: 200px;">
+        </div>
+      <% } %>
     </div>
     <div class="form-group">
       <label for="description">Description</label>
       <textarea id="description" name="description" rows="4" required><%= movie.description %></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Genres (Select up to 6)</label>
+      <div class="genres-container">
+        <% const genres = ['Action', 'Comedy', 'Horror', 'Drama', 'Thriller', 'Romance', 
+                          'Sci-Fi', 'Fantasy', 'Adventure', 'Crime', 'Mystery', 'Documentary',
+                          'Animation', 'Family', 'Historical', 'Musical', 'Superhero', 
+                          'Reality TV', 'Sports', 'Art House'];
+           const selectedGenres = JSON.parse(movie.genres || '[]'); %>
+        <% genres.forEach(genre => { %>
+          <label class="genre-checkbox">
+            <input type="checkbox" name="genres[]" value="<%= genre %>" 
+                   <%= selectedGenres.includes(genre) ? 'checked' : '' %>
+                   onchange="checkGenreLimit(this)">
+            <%= genre %>
+          </label>
+        <% }); %>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="language">Language</label>
+      <input type="text" id="language" name="language" value="<%= movie.language %>" required>
+    </div>
+
+    <div class="form-group">
+      <label for="releaseDate">Release Date</label>
+      <input type="date" id="releaseDate" name="releaseDate" 
+             value="<%= new Date(movie.release_date).toISOString().split('T')[0] %>" required>
+    </div>
+
+    <div class="form-group">
+      <label for="runtime">Runtime (e.g., 1h 43m)</label>
+      <input type="text" id="runtime" name="runtime" pattern="[0-9]+h [0-9]+m" 
+             placeholder="1h 43m" value="<%= movie.runtime %>" required>
     </div>
     
     <div id="servers-container">
@@ -72,6 +113,50 @@ function deleteLastServer() {
     serverCount--;
   }
 }
+
+function checkGenreLimit(checkbox) {
+  const checkedBoxes = document.querySelectorAll('input[name="genres[]"]:checked');
+  if (checkedBoxes.length > 6) {
+    checkbox.checked = false;
+    alert('You can only select up to 6 genres');
+  }
+}
 </script>
+
+<style>
+.genres-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.genre-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.genre-checkbox input {
+  width: auto;
+}
+
+.current-poster {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.btn-danger {
+  background-color: #dc2626;
+}
+
+.btn-danger:hover {
+  background-color: #b91c1c;
+}
+</style>
 
 <%- include('../partials/footer') %>

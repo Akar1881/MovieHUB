@@ -11,7 +11,7 @@ if (!fs.existsSync(dbDir)) {
 }
 
 // Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, 'public/uploads');
+const uploadsDir = path.join(__dirname, '../public/uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
@@ -33,13 +33,17 @@ const db_ops = {
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
 
-        // Movies table
+        // Movies table with new fields
         db.run(`CREATE TABLE IF NOT EXISTS movies (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           title TEXT NOT NULL,
           type TEXT NOT NULL,
           poster TEXT NOT NULL,
           description TEXT,
+          genres TEXT NOT NULL DEFAULT '[]',
+          language TEXT NOT NULL DEFAULT 'English',
+          release_date DATE NOT NULL,
+          runtime TEXT NOT NULL,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
 
@@ -52,13 +56,18 @@ const db_ops = {
           FOREIGN KEY(movie_id) REFERENCES movies(id) ON DELETE CASCADE
         )`);
 
-        // TV Shows table
+        // TV Shows table with new fields
         db.run(`CREATE TABLE IF NOT EXISTS tvshows (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           title TEXT NOT NULL,
           poster TEXT NOT NULL,
           description TEXT,
+          genres TEXT NOT NULL DEFAULT '[]',
+          language TEXT NOT NULL DEFAULT 'English',
+          release_date DATE NOT NULL,
+          runtime TEXT NOT NULL,
           seasons INTEGER NOT NULL,
+          total_episodes INTEGER NOT NULL,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
 
@@ -88,6 +97,16 @@ const db_ops = {
           content_type TEXT NOT NULL,
           rating INTEGER NOT NULL,
           comment TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        )`);
+
+        // Favorites table
+        db.run(`CREATE TABLE IF NOT EXISTS favorites (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER NOT NULL,
+          content_id INTEGER NOT NULL,
+          content_type TEXT NOT NULL,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
         )`);
@@ -151,10 +170,14 @@ const db_ops = {
   },
 
   // Movie operations
-  addMovie: (title, type, poster, description) => {
+  addMovie: (title, type, poster, description, genres, language, releaseDate, runtime) => {
     return new Promise((resolve, reject) => {
-      db.run('INSERT INTO movies (title, type, poster, description) VALUES (?, ?, ?, ?)',
-        [title, type, poster, description], function(err) {
+      db.run(`
+        INSERT INTO movies (
+          title, type, poster, description, genres, language, release_date, runtime
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [title, type, poster, description, JSON.stringify(genres), language, releaseDate, runtime],
+        function(err) {
           if (err) reject(err);
           resolve(this.lastID);
         });
@@ -163,33 +186,36 @@ const db_ops = {
 
   updateMovie: (id, data) => {
     return new Promise((resolve, reject) => {
-      const { title, type, description, poster } = data;
       const updates = [];
       const values = [];
       
-      if (title) {
-        updates.push('title = ?');
-        values.push(title);
-      }
-      if (type) {
-        updates.push('type = ?');
-        values.push(type);
-      }
-      if (description) {
-        updates.push('description = ?');
-        values.push(description);
-      }
-      if (poster) {
-        updates.push('poster = ?');
-        values.push(poster);
+      const fields = [
+        'title', 'type', 'description', 'poster', 'genres', 
+        'language', 'release_date', 'runtime'
+      ];
+      
+      fields.forEach(field => {
+        if (data[field] !== undefined) {
+          updates.push(`${field} = ?`);
+          values.push(field === 'genres' ? JSON.stringify(data[field]) : data[field]);
+        }
+      });
+      
+      if (updates.length === 0) {
+        resolve();
+        return;
       }
       
       values.push(id);
       
-      db.run(`UPDATE movies SET ${updates.join(', ')} WHERE id = ?`, values, (err) => {
-        if (err) reject(err);
-        resolve();
-      });
+      db.run(
+        `UPDATE movies SET ${updates.join(', ')} WHERE id = ?`,
+        values,
+        (err) => {
+          if (err) reject(err);
+          resolve();
+        }
+      );
     });
   },
 
@@ -223,10 +249,14 @@ const db_ops = {
   },
 
   // TV Show operations
-  addTVShow: (title, poster, description, seasons) => {
+  addTVShow: (title, poster, description, genres, language, releaseDate, runtime, seasons, totalEpisodes) => {
     return new Promise((resolve, reject) => {
-      db.run('INSERT INTO tvshows (title, poster, description, seasons) VALUES (?, ?, ?, ?)',
-        [title, poster, description, seasons], function(err) {
+      db.run(`
+        INSERT INTO tvshows (
+          title, poster, description, genres, language, release_date, runtime, seasons, total_episodes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [title, poster, description, JSON.stringify(genres), language, releaseDate, runtime, seasons, totalEpisodes],
+        function(err) {
           if (err) reject(err);
           resolve(this.lastID);
         });
@@ -235,33 +265,36 @@ const db_ops = {
 
   updateTVShow: (id, data) => {
     return new Promise((resolve, reject) => {
-      const { title, description, seasons, poster } = data;
       const updates = [];
       const values = [];
       
-      if (title) {
-        updates.push('title = ?');
-        values.push(title);
-      }
-      if (description) {
-        updates.push('description = ?');
-        values.push(description);
-      }
-      if (seasons) {
-        updates.push('seasons = ?');
-        values.push(seasons);
-      }
-      if (poster) {
-        updates.push('poster = ?');
-        values.push(poster);
+      const fields = [
+        'title', 'description', 'poster', 'genres', 'language',
+        'release_date', 'runtime', 'seasons', 'total_episodes'
+      ];
+      
+      fields.forEach(field => {
+        if (data[field] !== undefined) {
+          updates.push(`${field} = ?`);
+          values.push(field === 'genres' ? JSON.stringify(data[field]) : data[field]);
+        }
+      });
+      
+      if (updates.length === 0) {
+        resolve();
+        return;
       }
       
       values.push(id);
       
-      db.run(`UPDATE tvshows SET ${updates.join(', ')} WHERE id = ?`, values, (err) => {
-        if (err) reject(err);
-        resolve();
-      });
+      db.run(
+        `UPDATE tvshows SET ${updates.join(', ')} WHERE id = ?`,
+        values,
+        (err) => {
+          if (err) reject(err);
+          resolve();
+        }
+      );
     });
   },
 
@@ -493,7 +526,9 @@ const db_ops = {
           CASE 
             WHEN r.content_type = 'movie' THEN m.title 
             ELSE t.title 
-          END as title
+          END as title,
+          r.content_id,
+          r.content_type
         FROM reviews r
         LEFT JOIN movies m ON r.content_type = 'movie' AND r.content_id = m.id
         LEFT JOIN tvshows t ON r.content_type = 'tvshow' AND r.content_id = t.id
@@ -503,6 +538,19 @@ const db_ops = {
         if (err) reject(err);
         resolve(rows);
       });
+    });
+  },
+
+  hasUserReviewed: (userId, contentId, contentType) => {
+    return new Promise((resolve, reject) => {
+      db.get(
+        'SELECT id FROM reviews WHERE user_id = ? AND content_id = ? AND content_type = ?',
+        [userId, contentId, contentType],
+        (err, row) => {
+          if (err) reject(err);
+          resolve(!!row);
+        }
+      );
     });
   },
 
@@ -543,7 +591,71 @@ const db_ops = {
         resolve(rows);
       });
     });
+  },
+
+  // Favorites
+  addToFavorites: (userId, contentId, contentType) => {
+    return new Promise((resolve, reject) => {
+      db.run('INSERT INTO favorites (user_id, content_id, content_type) VALUES (?, ?, ?)',
+        [userId, contentId, contentType], (err) => {
+          if (err) reject(err);
+          resolve();
+        });
+    });
+  },
+
+  removeFromFavorites: (userId, contentId, contentType) => {
+    return new Promise((resolve, reject) => {
+      db.run('DELETE FROM favorites WHERE user_id = ? AND content_id = ? AND content_type = ?',
+        [userId, contentId, contentType], (err) => {
+          if (err) reject(err);
+          resolve();
+        });
+    });
+  },
+
+  getFavorites: (userId) => {
+    return new Promise((resolve, reject) => {
+      db.all(`
+        SELECT f.*, 
+          CASE 
+            WHEN f.content_type = 'movie' THEN m.title 
+            ELSE t.title 
+          END as title,
+          CASE 
+            WHEN f.content_type = 'movie' THEN m.poster
+            ELSE t.poster
+          END as poster
+        FROM favorites f
+        LEFT JOIN movies m ON f.content_type = 'movie' AND f.content_id = m.id
+        LEFT JOIN tvshows t ON f.content_type = 'tvshow' AND f.content_id = t.id
+        WHERE f.user_id = ?
+        ORDER BY f.created_at DESC
+      `, [userId], (err, rows) => {
+        if (err) reject(err);
+        resolve(rows);
+      });
+    });
+  },
+
+  isFavorite: (userId, contentId, contentType) => {
+    return new Promise((resolve, reject) => {
+      db.get('SELECT id FROM favorites WHERE user_id = ? AND content_id = ? AND content_type = ?',
+        [userId, contentId, contentType], (err, row) => {
+          if (err) reject(err);
+          resolve(!!row);
+        });
+    });
   }
 };
+
+deleteReview: (reviewId) => {
+  return new Promise((resolve, reject) => {
+    db.run('DELETE FROM reviews WHERE id = ?', [reviewId], (err) => {
+      if (err) reject(err);
+      resolve();
+    });
+  });
+},
 
 module.exports = db_ops;

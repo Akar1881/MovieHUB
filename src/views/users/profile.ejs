@@ -22,24 +22,80 @@
       </form>
     </div>
 
-    <div class="user-reviews">
-      <h3>Your Reviews</h3>
-      <% if (reviews.length > 0) { %>
-        <div class="reviews-grid">
-          <% reviews.forEach(review => { %>
-            <div class="review-card">
-              <h4><%= review.content_type === 'movie' ? 'Movie' : 'TV Show' %>: <%= review.title %></h4>
-              <div class="rating">Rating: <%= review.rating %>/5</div>
-              <p><%= review.comment %></p>
-              <small>Posted on <%= new Date(review.created_at).toLocaleDateString() %></small>
+    <div class="profile-tabs">
+      <button class="tab-button active" onclick="showTab('favorites')">My Favorites</button>
+      <button class="tab-button" onclick="showTab('reviews')">My Reviews</button>
+    </div>
+
+    <div id="favorites" class="tab-content active">
+      <h3>My Favorites</h3>
+      <% if (favorites && favorites.length > 0) { %>
+        <div class="content-grid">
+          <% favorites.forEach(favorite => { %>
+            <div class="content-card">
+              <a href="/<%= favorite.content_type %>s/<%= favorite.content_id %>">
+                <img src="<%= favorite.poster %>" alt="<%= favorite.title %>">
+                <div class="content-info">
+                  <div class="content-title"><%= favorite.title %></div>
+                  <div class="content-type"><%= favorite.content_type === 'movie' ? 'Movie' : 'TV Show' %></div>
+                </div>
+              </a>
             </div>
           <% }); %>
         </div>
       <% } else { %>
-        <p>You haven't written any reviews yet.</p>
+        <p class="no-content">You haven't added any favorites yet.</p>
+      <% } %>
+    </div>
+
+    <div id="reviews" class="tab-content">
+      <h3>My Reviews</h3>
+      <% if (reviews && reviews.length > 0) { %>
+        <div class="reviews-grid">
+          <% reviews.forEach(review => { %>
+            <div class="review-card">
+              <div class="review-header">
+                <h4>
+                  <a href="/<%= review.content_type %>s/<%= review.content_id %>">
+                    <%= review.title %>
+                  </a>
+                </h4>
+                <span class="content-type"><%= review.content_type === 'movie' ? 'Movie' : 'TV Show' %></span>
+              </div>
+              <div class="rating">
+                <% for(let i = 1; i <= 5; i++) { %>
+                  <i class="fas fa-star" style="color: <%= i <= review.rating ? '#FFD700' : '#333333' %>"></i>
+                <% } %>
+              </div>
+              <p class="review-comment"><%= review.comment %></p>
+              <div class="review-date">
+                <i class="far fa-clock"></i>
+                <%= new Date(review.created_at).toLocaleDateString() %>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <p class="no-content">You haven't written any reviews yet.</p>
       <% } %>
     </div>
   </div>
 </div>
+
+<script>
+function showTab(tabName) {
+  // Update buttons
+  document.querySelectorAll('.tab-button').forEach(button => {
+    button.classList.remove('active');
+  });
+  document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
+  
+  // Update content
+  document.querySelectorAll('.tab-content').forEach(content => {
+    content.classList.remove('active');
+  });
+  document.getElementById(tabName).classList.add('active');
+}
+</script>
 
 <%- include('../partials/footer') %>

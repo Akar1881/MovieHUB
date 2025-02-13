@@ -19,9 +19,46 @@
       <label for="description">Description</label>
       <textarea id="description" name="description" rows="4" required></textarea>
     </div>
+
+    <div class="form-group">
+      <label>Genres (Select up to 6)</label>
+      <div class="genres-container">
+        <% const genres = ['Action', 'Comedy', 'Horror', 'Drama', 'Thriller', 'Romance', 
+                          'Sci-Fi', 'Fantasy', 'Adventure', 'Crime', 'Mystery', 'Documentary',
+                          'Animation', 'Family', 'Historical', 'Musical', 'Superhero', 
+                          'Reality TV', 'Sports', 'Art House']; %>
+        <% genres.forEach(genre => { %>
+          <label class="genre-checkbox">
+            <input type="checkbox" name="genres[]" value="<%= genre %>" onchange="checkGenreLimit(this)">
+            <%= genre %>
+          </label>
+        <% }); %>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="language">Language</label>
+      <input type="text" id="language" name="language" required>
+    </div>
+
+    <div class="form-group">
+      <label for="releaseDate">Release Date</label>
+      <input type="date" id="releaseDate" name="releaseDate" required>
+    </div>
+
+    <div class="form-group">
+      <label for="runtime">Runtime per Episode (e.g., 45m)</label>
+      <input type="text" id="runtime" name="runtime" pattern="[0-9]+m" placeholder="45m" required>
+    </div>
+
     <div class="form-group">
       <label for="seasons">Number of Seasons</label>
       <input type="number" id="seasons" name="seasons" min="1" required>
+    </div>
+
+    <div class="form-group">
+      <label for="totalEpisodes">Total Episodes</label>
+      <input type="number" id="totalEpisodes" name="totalEpisodes" min="1" required>
     </div>
     
     <div id="episodes-container">
@@ -91,6 +128,14 @@ function addServer(season, episode, episodeIndex) {
   container.appendChild(serverDiv);
 }
 
+function checkGenreLimit(checkbox) {
+  const checkedBoxes = document.querySelectorAll('input[name="genres[]"]:checked');
+  if (checkedBoxes.length > 6) {
+    checkbox.checked = false;
+    alert('You can only select up to 6 genres');
+  }
+}
+
 // Add form submission handler
 document.getElementById('tvshowForm').addEventListener('submit', function(e) {
   if (seasonCount === 0) {
@@ -101,5 +146,26 @@ document.getElementById('tvshowForm').addEventListener('submit', function(e) {
   return true;
 });
 </script>
+
+<style>
+.genres-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.genre-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.genre-checkbox input {
+  width: auto;
+}
+</style>
 
 <%- include('../partials/footer') %>

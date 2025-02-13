@@ -17,7 +17,11 @@ const isAdmin = (req, res, next) => {
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'src/public/uploads');
+    const uploadsDir = path.join(__dirname, '../public/uploads');
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+    cb(null, uploadsDir);
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
@@ -56,14 +60,43 @@ router.get('/movies/add', isAdmin, (req, res) => {
 // Add movie process
 router.post('/movies/add', isAdmin, upload.single('poster'), async (req, res) => {
   try {
-    const { title, type, description } = req.body;
+    const { 
+      title, 
+      type, 
+      description, 
+      genres, 
+      language, 
+      releaseDate, 
+      runtime, 
+      servers 
+    } = req.body;
+
+    if (!req.file) {
+      throw new Error('Poster image is required');
+    }
+
     const poster = '/uploads/' + req.file.filename;
-    const movieId = await db.addMovie(title, type, poster, description);
+    const selectedGenres = Array.isArray(genres) ? genres : [];
+
+    const movieId = await db.addMovie(
+      title,
+      type,
+      poster,
+      description,
+      selectedGenres,
+      language,
+      releaseDate,
+      runtime
+    );
     
     // Handle servers
-    const servers = req.body.servers || [];
-    for (const server of servers) {
-      await db.addMovieServer(movieId, server.name, server.url);
+    if (servers && typeof servers === 'object') {
+      const serverEntries = Object.entries(servers);
+      for (const [index, server] of serverEntries) {
+        if (server.name && server.url) {
+          await db.addMovieServer(movieId, server.name, server.url);
+        }
+      }
     }
     
     res.redirect('/admin');
@@ -97,15 +130,37 @@ router.post('/movies/edit/:id', isAdmin, upload.single('poster'), async (req, re
       return res.redirect('/admin');
     }
 
-    const { title, type, description, servers } = req.body;
-    const updateData = { title, type, description };
+    const { 
+      title, 
+      type, 
+      description, 
+      genres, 
+      language, 
+      releaseDate, 
+      runtime, 
+      servers 
+    } = req.body;
+
+    const updateData = { 
+      title, 
+      type, 
+      description,
+      genres: Array.isArray(genres) ? genres : [],
+      language,
+      release_date: releaseDate,
+      runtime
+    };
     
     if (req.file) {
       updateData.poster = '/uploads/' + req.file.filename;
       // Delete old poster
       if (movie.poster) {
         const oldPosterPath = path.join(__dirname, '../public', movie.poster);
-        fs.unlink(oldPosterPath, () => {});
+        fs.unlink(oldPosterPath, (err) => {
+          if (err && err.code !== 'ENOENT') {
+            console.error('Error deleting old poster:', err);
+          }
+        });
       }
     }
     
@@ -113,9 +168,12 @@ router.post('/movies/edit/:id', isAdmin, upload.single('poster'), async (req, re
     
     // Update servers
     await db.deleteMovieServers(req.params.id);
-    if (servers) {
-      for (const server of servers) {
-        await db.addMovieServer(req.params.id, server.name, server.url);
+    if (servers && typeof servers === 'object') {
+      const serverEntries = Object.entries(servers);
+      for (const [index, server] of serverEntries) {
+        if (server.name && server.url) {
+          await db.addMovieServer(req.params.id, server.name, server.url);
+        }
       }
     }
     
@@ -135,7 +193,11 @@ router.post('/movies/delete/:id', isAdmin, async (req, res) => {
     const movie = await db.getMovieById(req.params.id);
     if (movie && movie.poster) {
       const posterPath = path.join(__dirname, '../public', movie.poster);
-      fs.unlink(posterPath, () => {});
+      fs.unlink(posterPath, (err) => {
+        if (err && err.code !== 'ENOENT') {
+          console.error('Error deleting poster:', err);
+        }
+      });
     }
     await db.deleteMovie(req.params.id);
     res.redirect('/admin');
@@ -153,27 +215,51 @@ router.get('/tvshows/add', isAdmin, (req, res) => {
 // Add TV show process
 router.post('/tvshows/add', isAdmin, upload.single('poster'), async (req, res) => {
   try {
-    const { title, description, seasons, episodes } = req.body;
+    const { 
+      title, 
+      description, 
+      genres,
+      language,
+      releaseDate,
+      runtime,
+      seasons, 
+      totalEpisodes,
+      episodes 
+    } = req.body;
     
-    if (!episodes || !Array.isArray(episodes)) {
-      throw new Error('No episodes provided');
+    if (!req.file) {
+      throw new Error('Poster image is required');
     }
 
     const poster = '/uploads/' + req.file.filename;
-    const tvshowId = await db.addTVShow(title, poster, description, seasons);
+    const selectedGenres = Array.isArray(genres) ? genres : [];
+
+    const tvshowId = await db.addTVShow(
+      title,
+      poster,
+      description,
+      selectedGenres,
+      language,
+      releaseDate,
+      runtime,
+      seasons,
+      totalEpisodes
+    );
     
     // Handle episodes and servers
-    for (const episode of episodes) {
-      if (!episode.season || !episode.number) {
-        continue;
-      }
-      
-      const episodeId = await db.addTVShowEpisode(tvshowId, episode.season, episode.number);
-      
-      if (episode.servers && Array.isArray(episode.servers)) {
-        for (const server of episode.servers) {
-          if (server.name && server.url) {
-            await db.addEpisodeServer(episodeId, server.name, server.url);
+    if (episodes && typeof episodes === 'object') {
+      const episodeEntries = Object.entries(episodes);
+      for (const [index, episode] of episodeEntries) {
+        if (!episode.season || !episode.number) continue;
+        
+        const episodeId = await db.addTVShowEpisode(tvshowId, episode.season, episode.number);
+        
+        if (episode.servers && typeof episode.servers === 'object') {
+          const serverEntries = Object.entries(episode.servers);
+          for (const [serverIndex, server] of serverEntries) {
+            if (server.name && server.url) {
+              await db.addEpisodeServer(episodeId, server.name, server.url);
+            }
           }
         }
       }
@@ -215,63 +301,67 @@ router.post('/tvshows/edit/:id', isAdmin, upload.single('poster'), async (req, r
       throw new Error('TV show not found');
     }
 
-    const { title, description, seasons } = req.body;
-    const updateData = { title, description, seasons };
+    const { 
+      title, 
+      description, 
+      genres,
+      language,
+      releaseDate,
+      runtime,
+      seasons,
+      totalEpisodes,
+      episodes 
+    } = req.body;
+
+    const updateData = { 
+      title, 
+      description,
+      genres: Array.isArray(genres) ? genres : [],
+      language,
+      release_date: releaseDate,
+      runtime,
+      seasons,
+      total_episodes: totalEpisodes
+    };
     
     if (req.file) {
       updateData.poster = '/uploads/' + req.file.filename;
       // Delete old poster
       if (tvshow.poster) {
         const oldPosterPath = path.join(__dirname, '../public', tvshow.poster);
-        fs.unlink(oldPosterPath, () => {});
+        fs.unlink(oldPosterPath, (err) => {
+          if (err && err.code !== 'ENOENT') {
+            console.error('Error deleting old poster:', err);
+          }
+        });
       }
     }
     
     await db.updateTVShow(req.params.id, updateData);
     
     // Process episodes data
-    const episodes = [];
-    if (req.body.episodes) {
-      for (const [index, episode] of Object.entries(req.body.episodes)) {
-        if (episode && episode.season && episode.number) {
-          const episodeData = {
-            id: episode.id || null,
-            season: parseInt(episode.season),
-            number: parseInt(episode.number),
-            servers: []
-          };
+    if (episodes && typeof episodes === 'object') {
+      const episodeEntries = Object.entries(episodes);
+      for (const [index, episode] of episodeEntries) {
+        if (!episode || !episode.season || !episode.number) continue;
 
-          // Process servers for this episode
-          if (episode.servers) {
-            for (const server of Object.values(episode.servers)) {
-              if (server.name && server.url) {
-                episodeData.servers.push({
-                  name: server.name,
-                  url: server.url
-                });
-              }
+        let episodeId = episode.id;
+        if (episodeId) {
+          await db.updateTVShowEpisode(episodeId, episode.season, episode.number);
+          await db.deleteEpisodeServers(episodeId);
+        } else {
+          episodeId = await db.addTVShowEpisode(req.params.id, episode.season, episode.number);
+        }
+        
+        // Add servers for the episode
+        if (episode.servers && typeof episode.servers === 'object') {
+          const serverEntries = Object.entries(episode.servers);
+          for (const [serverIndex, server] of serverEntries) {
+            if (server.name && server.url) {
+              await db.addEpisodeServer(episodeId, server.name, server.url);
             }
           }
-          
-          episodes.push(episodeData);
         }
-      }
-    }
-    
-    // Update episodes and servers
-    for (const episode of episodes) {
-      let episodeId;
-      if (episode.id) {
-        await db.updateTVShowEpisode(episode.id, episode.season, episode.number);
-        await db.deleteEpisodeServers(episode.id);
-        episodeId = episode.id;
-      } else {
-        episodeId = await db.addTVShowEpisode(req.params.id, episode.season, episode.number);
-      }
-      
-      // Add servers for the episode
-      for (const server of episode.servers) {
-        await db.addEpisodeServer(episodeId, server.name, server.url);
       }
     }
     
@@ -302,7 +392,11 @@ router.post('/tvshows/delete/:id', isAdmin, async (req, res) => {
     const tvshow = await db.getTVShowById(req.params.id);
     if (tvshow && tvshow.poster) {
       const posterPath = path.join(__dirname, '../public', tvshow.poster);
-      fs.unlink(posterPath, () => {});
+      fs.unlink(posterPath, (err) => {
+        if (err && err.code !== 'ENOENT') {
+          console.error('Error deleting poster:', err);
+        }
+      });
     }
     await db.deleteTVShow(req.params.id);
     res.redirect('/admin');

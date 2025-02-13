@@ -1,6 +1,6 @@
 /* Profile page styles */
 .profile-container {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 2rem auto;
   padding: 2rem;
   background-color: var(--secondary);
@@ -15,8 +15,19 @@
   text-align: center;
 }
 
+.profile-container h3 {
+  color: var(--primary);
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  border-bottom: 2px solid var(--primary);
+  padding-bottom: 0.5rem;
+}
+
 .profile-info {
   margin-bottom: 3rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 2rem;
+  border-radius: 8px;
 }
 
 .form-group {
@@ -64,20 +75,131 @@
   background-color: #e6c200;
 }
 
-.user-reviews {
-  margin-top: 3rem;
+.profile-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
 }
 
-.user-reviews h3 {
+.tab-button {
+  padding: 0.75rem 1.5rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: none;
+  border-radius: 4px;
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab-button.active {
+  background-color: var(--primary);
+  color: var(--secondary);
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: 1rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) rgba(255, 255, 255, 0.1);
+}
+
+.content-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.content-grid::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.content-grid::-webkit-scrollbar-thumb {
+  background-color: var(--primary);
+  border-radius: 4px;
+}
+
+.content-card {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.content-card:hover {
+  transform: translateY(-5px);
+}
+
+.content-card a {
+  text-decoration: none;
+  color: var(--text);
+}
+
+.content-card img {
+  width: 100%;
+  aspect-ratio: 2/3;
+  object-fit: cover;
+}
+
+.content-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+  color: var(--text);
+}
+
+.content-title {
   color: var(--primary);
-  margin-bottom: 1.5rem;
-  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.content-type {
+  font-size: 0.875rem;
+  opacity: 0.8;
 }
 
 .reviews-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: 1rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) rgba(255, 255, 255, 0.1);
+}
+
+.reviews-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.reviews-grid::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.reviews-grid::-webkit-scrollbar-thumb {
+  background-color: var(--primary);
+  border-radius: 4px;
 }
 
 .review-card {
@@ -87,27 +209,53 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.review-card h4 {
-  color: var(--primary);
-  margin-bottom: 0.5rem;
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.review-header h4 {
+  margin: 0;
   font-size: 1.1rem;
 }
 
-.review-card .rating {
-  color: #fbbf24;
-  margin-bottom: 0.75rem;
-  font-weight: 500;
+.review-header h4 a {
+  color: var(--primary);
+  text-decoration: none;
 }
 
-.review-card p {
+.review-header h4 a:hover {
+  text-decoration: underline;
+}
+
+.rating {
+  margin-bottom: 1rem;
+}
+
+.review-comment {
   color: var(--text);
   margin-bottom: 1rem;
   line-height: 1.5;
 }
 
-.review-card small {
+.review-date {
   color: rgba(255, 255, 255, 0.6);
   font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.no-content {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 2rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
 }
 
 .alert {
@@ -121,4 +269,30 @@
   background-color: rgba(220, 38, 38, 0.1);
   color: #ef4444;
   border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+@media (max-width: 768px) {
+  .profile-container {
+    margin: 1rem;
+    padding: 1rem;
+  }
+  
+  .profile-info {
+    padding: 1rem;
+  }
+  
+  .profile-tabs {
+    flex-direction: column;
+  }
+  
+  .content-grid,
+  .reviews-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  
+  .review-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
 }

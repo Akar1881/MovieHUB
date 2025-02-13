@@ -16,7 +16,8 @@ router.get('/profile', isAuthenticated, async (req, res) => {
   try {
     const user = await db.getUserById(req.session.user.id);
     const reviews = await db.getUserReviews(req.session.user.id);
-    res.render('users/profile', { user, reviews });
+    const favorites = await db.getFavorites(req.session.user.id);
+    res.render('users/profile', { user, reviews, favorites });
   } catch (err) {
     res.redirect('/');
   }
@@ -31,7 +32,37 @@ router.post('/profile', isAuthenticated, async (req, res) => {
     req.session.user.email = email;
     res.redirect('/user/profile');
   } catch (err) {
-    res.render('users/profile', { error: 'Failed to update profile' });
+    const user = await db.getUserById(req.session.user.id);
+    const reviews = await db.getUserReviews(req.session.user.id);
+    const favorites = await db.getFavorites(req.session.user.id);
+    res.render('users/profile', { 
+      user, 
+      reviews, 
+      favorites, 
+      error: 'Failed to update profile' 
+    });
+  }
+});
+
+// Add to favorites
+router.post('/favorites/add', isAuthenticated, async (req, res) => {
+  try {
+    const { contentId, contentType } = req.body;
+    await db.addToFavorites(req.session.user.id, contentId, contentType);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to add to favorites' });
+  }
+});
+
+// Remove from favorites
+router.post('/favorites/remove', isAuthenticated, async (req, res) => {
+  try {
+    const { contentId, contentType } = req.body;
+    await db.removeFromFavorites(req.session.user.id, contentId, contentType);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to remove from favorites' });
   }
 });
 

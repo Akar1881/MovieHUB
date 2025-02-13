@@ -15,45 +15,120 @@
       <label for="poster">Poster (1200x1809)</label>
       <input type="file" id="poster" name="poster" accept="image/jpeg,image/png">
       <small>Leave empty to keep current poster</small>
+      <% if (tvshow.poster) { %>
+        <div class="current-poster">
+          <img src="<%= tvshow.poster %>" alt="Current poster" style="max-width: 200px;">
+        </div>
+      <% } %>
     </div>
     <div class="form-group">
       <label for="description">Description</label>
       <textarea id="description" name="description" rows="4" required><%= tvshow.description %></textarea>
     </div>
+
+    <div class="form-group">
+      <label>Genres (Select up to 6)</label>
+      <div class="genres-container">
+        <% const genres = ['Action', 'Comedy', 'Horror', 'Drama', 'Thriller', 'Romance', 
+                          'Sci-Fi', 'Fantasy', 'Adventure', 'Crime', 'Mystery', 'Documentary',
+                          'Animation', 'Family', 'Historical', 'Musical', 'Superhero', 
+                          'Reality TV', 'Sports', 'Art House'];
+           const selectedGenres = JSON.parse(tvshow.genres || '[]'); %>
+        <% genres.forEach(genre => { %>
+          <label class="genre-checkbox">
+            <input type="checkbox" name="genres[]" value="<%= genre %>" 
+                   <%= selectedGenres.includes(genre) ? 'checked' : '' %>
+                   onchange="checkGenreLimit(this)">
+            <%= genre %>
+          </label>
+        <% }); %>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="language">Language</label>
+      <input type="text" id="language" name="language" value="<%= tvshow.language %>" required>
+    </div>
+
+    <div class="form-group">
+      <label for="releaseDate">Release Date</label>
+      <input type="date" id="releaseDate" name="releaseDate" 
+             value="<%= new Date(tvshow.release_date).toISOString().split('T')[0] %>" required>
+    </div>
+
+    <div class="form-group">
+      <label for="runtime">Runtime per Episode (e.g., 45m)</label>
+      <input type="text" id="runtime" name="runtime" pattern="[0-9]+m" 
+             placeholder="45m" value="<%= tvshow.runtime %>" required>
+    </div>
+
     <div class="form-group">
       <label for="seasons">Number of Seasons</label>
       <input type="number" id="seasons" name="seasons" min="1" value="<%= tvshow.seasons %>" required>
+      <small>Increase this number to add new seasons</small>
+    </div>
+
+    <div class="form-group">
+      <label for="totalEpisodes">Total Episodes</label>
+      <input type="number" id="totalEpisodes" name="totalEpisodes" min="1" value="<%= tvshow.total_episodes %>" required>
     </div>
     
     <div id="episodes-container">
       <h3>Episodes</h3>
-      <% episodes.forEach((episode, index) => { %>
-        <div class="episode-entry" data-season="<%= episode.season %>">
-          <h4>Season <%= episode.season %> Episode <%= episode.episode %></h4>
-          <input type="hidden" name="episodes[<%= index %>][id]" value="<%= episode.id %>">
-          <input type="hidden" name="episodes[<%= index %>][season]" value="<%= episode.season %>">
-          <input type="hidden" name="episodes[<%= index %>][number]" value="<%= episode.episode %>">
+      <div class="seasons-tabs">
+        <% for(let i = 1; i <= tvshow.seasons; i++) { %>
+          <button type="button" class="season-tab" onclick="showSeason(<%= i %>)">Season <%= i %></button>
+        <% } %>
+      </div>
+      
+      <% 
+        const episodesBySeason = {};
+        episodes.forEach(episode => {
+          if (!episodesBySeason[episode.season]) {
+            episodesBySeason[episode.season] = [];
+          }
+          episodesBySeason[episode.season].push(episode);
+        });
+      %>
+      
+      <% for(let season = 1; season <= tvshow.seasons; season++) { %>
+        <div class="season-content" id="season-<%= season %>" style="display: <%= season === 1 ? 'block' : 'none' %>">
+          <div class="season-header">
+            <h4>Season <%= season %></h4>
+            <button type="button" class="btn" onclick="addEpisodeToSeason(<%= season %>)">Add Episode to Season <%= season %></button>
+          </div>
           
-          <div id="episode-<%= episode.id %>-servers">
-            <% episode.servers.forEach((server, serverIndex) => { %>
-              <div class="server-entry">
-                <div class="form-group">
-                  <label>Server <%= serverIndex + 1 %></label>
-                  <input type="text" name="episodes[<%= index %>][servers][<%= serverIndex %>][name]" value="<%= server.server_name %>" placeholder="Server name" required>
-                  <input type="text" name="episodes[<%= index %>][servers][<%= serverIndex %>][url]" value="<%= server.embed_url %>" placeholder="Embed URL" required>
+          <div class="season-episodes">
+            <% (episodesBySeason[season] || []).forEach((episode, index) => { %>
+              <div class="episode-entry" data-season="<%= season %>">
+                <h4>Episode <%= episode.episode %></h4>
+                <input type="hidden" name="episodes[<%= index %>][id]" value="<%= episode.id %>">
+                <input type="hidden" name="episodes[<%= index %>][season]" value="<%= episode.season %>">
+                <input type="hidden" name="episodes[<%= index %>][number]" value="<%= episode.episode %>">
+                
+                <div id="episode-<%= episode.id %>-servers">
+                  <% episode.servers.forEach((server, serverIndex) => { %>
+                    <div class="server-entry">
+                      <div class="form-group">
+                        <label>Server <%= serverIndex + 1 %></label>
+                        <input type="text" name="episodes[<%= index %>][servers][<%= serverIndex %>][name]" value="<%= server.server_name %>" placeholder="Server name" required>
+                        <input type="text" name="episodes[<%= index %>][servers][<%= serverIndex %>][url]" value="<%= server.embed_url %>" placeholder="Embed URL" required>
+                      </div>
+                    </div>
+                  <% }); %>
+                </div>
+                <div class="episode-actions">
+                  <button type="button" class="btn" onclick="addServer('<%= episode.id %>', <%= index %>)">Add Server</button>
+                  <button type="button" class="btn btn-danger" onclick="deleteLastServer('<%= episode.id %>')">Delete Last Server</button>
+                  <button type="button" class="btn btn-danger" onclick="deleteEpisode(this)">Delete Episode</button>
                 </div>
               </div>
             <% }); %>
           </div>
-          <button type="button" class="btn" onclick="addServer('<%= episode.id %>', <%= index %>)">Add Server</button>
-          <button type="button" class="btn btn-danger" onclick="deleteLastServer('<%= episode.id %>')">Delete Last Server</button>
         </div>
-      <% }); %>
+      <% } %>
     </div>
     
-    <button type="button" class="btn" onclick="addEpisode()">Add Episode</button>
-    <button type="button" class="btn btn-danger" onclick="deleteLastEpisode()">Delete Last Episode</button>
-    <button type="button" class="btn btn-danger" onclick="deleteLastSeason()">Delete Last Season</button>
     <button type="submit" class="btn">Update TV Show</button>
   </form>
 </div>
@@ -62,22 +137,81 @@
 let episodeCount = <%= episodes.length %>;
 let seasonCount = <%= tvshow.seasons %>;
 
-function addEpisode() {
-  const season = document.getElementById('seasons').value;
+// Watch for changes in the seasons input
+document.getElementById('seasons').addEventListener('change', function() {
+  const newSeasonCount = parseInt(this.value);
+  const tabsContainer = document.querySelector('.seasons-tabs');
   const container = document.getElementById('episodes-container');
   
-  const seasonEpisodes = Array.from(container.children)
-    .filter(el => el.dataset.season === season);
-  const lastEpisodeNumber = seasonEpisodes.length + 1;
+  // Adding new seasons
+  if (newSeasonCount > seasonCount) {
+    for (let i = seasonCount + 1; i <= newSeasonCount; i++) {
+      // Add season tab
+      const tabButton = document.createElement('button');
+      tabButton.type = 'button';
+      tabButton.className = 'season-tab';
+      tabButton.onclick = () => showSeason(i);
+      tabButton.textContent = `Season ${i}`;
+      tabsContainer.appendChild(tabButton);
+      
+      // Add season content
+      const seasonDiv = document.createElement('div');
+      seasonDiv.className = 'season-content';
+      seasonDiv.id = `season-${i}`;
+      seasonDiv.style.display = 'none';
+      seasonDiv.innerHTML = `
+        <div class="season-header">
+          <h4>Season ${i}</h4>
+          <button type="button" class="btn" onclick="addEpisodeToSeason(${i})">Add Episode to Season ${i}</button>
+        </div>
+        <div class="season-episodes"></div>
+      `;
+      container.appendChild(seasonDiv);
+    }
+  }
+  // Removing seasons (only if they're empty)
+  else if (newSeasonCount < seasonCount) {
+    for (let i = seasonCount; i > newSeasonCount; i--) {
+      const seasonContent = document.getElementById(`season-${i}`);
+      const episodes = seasonContent.querySelectorAll('.episode-entry');
+      if (episodes.length > 0) {
+        alert(`Cannot remove season ${i} as it contains episodes. Please delete all episodes first.`);
+        this.value = seasonCount;
+        return;
+      }
+      // Remove tab and content
+      tabsContainer.removeChild(tabsContainer.lastChild);
+      container.removeChild(seasonContent);
+    }
+  }
+  seasonCount = newSeasonCount;
+});
+
+function showSeason(seasonNumber) {
+  document.querySelectorAll('.season-content').forEach(content => {
+    content.style.display = 'none';
+  });
+  document.getElementById(`season-${seasonNumber}`).style.display = 'block';
+  
+  document.querySelectorAll('.season-tab').forEach(tab => {
+    tab.classList.remove('active');
+  });
+  document.querySelector(`.season-tab:nth-child(${seasonNumber})`).classList.add('active');
+}
+
+function addEpisodeToSeason(season) {
+  const seasonContent = document.getElementById(`season-${season}`);
+  const seasonEpisodes = seasonContent.querySelectorAll('.episode-entry');
+  const episodeNumber = seasonEpisodes.length + 1;
   
   const episodeDiv = document.createElement('div');
   episodeDiv.className = 'episode-entry';
   episodeDiv.dataset.season = season;
   
   episodeDiv.innerHTML = `
-    <h4>Season ${season} Episode ${lastEpisodeNumber}</h4>
+    <h4>Episode ${episodeNumber}</h4>
     <input type="hidden" name="episodes[${episodeCount}][season]" value="${season}">
-    <input type="hidden" name="episodes[${episodeCount}][number]" value="${lastEpisodeNumber}">
+    <input type="hidden" name="episodes[${episodeCount}][number]" value="${episodeNumber}">
     <div id="episode-new-${episodeCount}-servers">
       <div class="server-entry">
         <div class="form-group">
@@ -87,12 +221,18 @@ function addEpisode() {
         </div>
       </div>
     </div>
-    <button type="button" class="btn" onclick="addServer('new-${episodeCount}', ${episodeCount})">Add Server</button>
-    <button type="button" class="btn btn-danger" onclick="deleteLastServer('new-${episodeCount}')">Delete Last Server</button>
+    <div class="episode-actions">
+      <button type="button" class="btn" onclick="addServer('new-${episodeCount}', ${episodeCount})">Add Server</button>
+      <button type="button" class="btn btn-danger" onclick="deleteLastServer('new-${episodeCount}')">Delete Last Server</button>
+      <button type="button" class="btn btn-danger" onclick="deleteEpisode(this)">Delete Episode</button>
+    </div>
   `;
   
-  container.appendChild(episodeDiv);
+  seasonContent.querySelector('.season-episodes').appendChild(episodeDiv);
   episodeCount++;
+  
+  // Update total episodes count
+  document.getElementById('totalEpisodes').value = parseInt(document.getElementById('totalEpisodes').value) + 1;
 }
 
 function addServer(episodeId, episodeIndex) {
@@ -117,30 +257,108 @@ function deleteLastServer(episodeId) {
   }
 }
 
-function deleteLastEpisode() {
-  const container = document.getElementById('episodes-container');
-  if (container.children.length > 0) {
-    container.removeChild(container.lastChild);
-    episodeCount--;
+function deleteEpisode(button) {
+  if (confirm('Are you sure you want to delete this episode?')) {
+    const episodeEntry = button.closest('.episode-entry');
+    episodeEntry.remove();
+    // Update total episodes count
+    document.getElementById('totalEpisodes').value = parseInt(document.getElementById('totalEpisodes').value) - 1;
   }
 }
 
-function deleteLastSeason() {
-  if (seasonCount > 1) {
-    const container = document.getElementById('episodes-container');
-    const episodes = Array.from(container.children);
-    const lastSeason = seasonCount;
-    
-    episodes.forEach(episode => {
-      if (parseInt(episode.dataset.season) === lastSeason) {
-        container.removeChild(episode);
-      }
-    });
-    
-    seasonCount--;
-    document.getElementById('seasons').value = seasonCount;
+function checkGenreLimit(checkbox) {
+  const checkedBoxes = document.querySelectorAll('input[name="genres[]"]:checked');
+  if (checkedBoxes.length > 6) {
+    checkbox.checked = false;
+    alert('You can only select up to 6 genres');
   }
 }
+
+// Show first season by default
+showSeason(1);
 </script>
+
+<style>
+.genres-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.genre-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.genre-checkbox input {
+  width: auto;
+}
+
+.current-poster {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.btn-danger {
+  background-color: #dc2626;
+}
+
+.btn-danger:hover {
+  background-color: #b91c1c;
+}
+
+.seasons-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.season-tab {
+  padding: 0.5rem 1rem;
+  background-color: var(--secondary);
+  border: 1px solid var(--primary);
+  color: var(--text);
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.season-tab.active {
+  background-color: var(--primary);
+  color: var(--secondary);
+}
+
+.season-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.season-episodes {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.episode-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.episode-entry {
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+</style>
 
 <%- include('../partials/footer') %>

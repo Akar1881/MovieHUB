@@ -2,17 +2,18 @@ const express = require('express');
 const session = require('express-session');
 const SQLiteStore = require('connect-sqlite3')(session);
 const path = require('path');
+const fs = require('fs');
 const config = require('../config.json');
 const db = require('./database');
-const authRoutes = require('./routes/auth');
-const adminRoutes = require('./routes/admin');
-const movieRoutes = require('./routes/movies');
-const tvshowRoutes = require('./routes/tvshows');
-const userRoutes = require('./routes/users');
-const apiRoutes = require('./routes/api');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Ensure database directory exists
+const dbDir = path.join(__dirname, '../database');
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+}
 
 // Middleware
 app.set('view engine', 'ejs');
@@ -25,7 +26,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(session({
     store: new SQLiteStore({
         db: 'sessions.db',
-        dir: './database'
+        dir: './database',
+        concurrentDB: true
     }),
     secret: 'your-secret-key',
     resave: false,
@@ -41,6 +43,13 @@ app.use((req, res, next) => {
 });
 
 // Routes
+const authRoutes = require('./routes/auth');
+const adminRoutes = require('./routes/admin');
+const movieRoutes = require('./routes/movies');
+const tvshowRoutes = require('./routes/tvshows');
+const userRoutes = require('./routes/users');
+const apiRoutes = require('./routes/api');
+
 app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
 app.use('/movies', movieRoutes);
@@ -50,14 +59,42 @@ app.use('/api', apiRoutes);
 
 // Home route
 app.get('/', async (req, res) => {
-    const movies = await db.getLatestMovies();
-    const tvshows = await db.getLatestTVShows();
-    res.render('home', { movies, tvshows });
+    try {
+        const movies = await db.getLatestMovies();
+        const tvshows = await db.getLatestTVShows();
+        res.render('home', { movies, tvshows });
+    } catch (err) {
+        console.error('Home page error:', err);
+        res.render('home', { movies: [], tvshows: [], error: 'Failed to load content' });
+    }
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Application error:', err);
+    res.status(500).render('error', { 
+        message: 'An error occurred',
+        error: process.env.NODE_ENV === 'development' ? err : {}
+    });
 });
 
 // Initialize database and start server
-db.initDatabase().then(() => {
-    app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
-    });
+const initServer = async () => {
+    try {
+        await db.initDatabase();
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+        });
+    } catch (err) {
+        console.error('Failed to initialize database:', err);
+        process.exit(1);
+    }
+};
+
+// Handle graceful shutdown
+process.on('SIGINT', async () => {
+    console.log('Shutting down gracefully...');
+    process.exit(0);
 });
+
+initServer();
