@@ -2,18 +2,58 @@
 
 <div class="container">
     <h1>TV Shows</h1>
+    
+    <div class="filter-controls">
+        <select id="sort-select" class="filter-select">
+            <option value="latest">Latest</option>
+            <option value="oldest">Oldest</option>
+            <option value="rating">Highest Rated</option>
+        </select>
+    </div>
+
     <div class="content-grid">
         <% tvshows.forEach(tvshow => { %>
-            <div class="content-card">
+            <div class="content-card" data-rating="<%= tvshow.avgRating || 0 %>" data-date="<%= tvshow.created_at %>">
                 <a href="/tvshows/<%= tvshow.id %>">
                     <img src="<%= tvshow.poster %>" alt="<%= tvshow.title %>">
                     <div class="content-info">
                         <h3><%= tvshow.title %></h3>
+                        <div class="rating-display">
+                            <div class="rating-stars">
+                                <% for(let i = 1; i <= 5; i++) { %>
+                                    <i class="fas fa-star<%= i <= (tvshow.avgRating || 0) ? '' : '-o' %>"></i>
+                                <% } %>
+                            </div>
+                            <span class="rating-number"><%= (tvshow.avgRating || 0).toFixed(1) %></span>
+                        </div>
                     </div>
                 </a>
             </div>
         <% }); %>
     </div>
 </div>
+
+<script>
+const sortSelect = document.getElementById('sort-select');
+const contentGrid = document.querySelector('.content-grid');
+
+function sortTVShows(criteria) {
+    const tvshows = Array.from(contentGrid.children);
+    
+    tvshows.sort((a, b) => {
+        if (criteria === 'latest') {
+            return new Date(b.dataset.date) - new Date(a.dataset.date);
+        } else if (criteria === 'oldest') {
+            return new Date(a.dataset.date) - new Date(b.dataset.date);
+        } else if (criteria === 'rating') {
+            return parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating);
+        }
+    });
+    
+    tvshows.forEach(tvshow => contentGrid.appendChild(tvshow));
+}
+
+sortSelect.addEventListener('change', (e) => sortTVShows(e.target.value));
+</script>
 
 <%- include('../partials/footer') %>

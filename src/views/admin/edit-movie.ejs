@@ -1,0 +1,68 @@
+<%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/add-movie.css">
+
+<div class="form-container">
+  <h2>Edit Movie</h2>
+  <% if (locals.error) { %>
+    <div class="alert alert-error"><%= error %></div>
+  <% } %>
+  <form action="/admin/movies/edit/<%= movie.id %>" method="POST" enctype="multipart/form-data">
+    <div class="form-group">
+      <label for="title">Title</label>
+      <input type="text" id="title" name="title" value="<%= movie.title %>" required>
+    </div>
+    <div class="form-group">
+      <label for="type">Type</label>
+      <select id="type" name="type" required>
+        <option value="movie" <%= movie.type === 'movie' ? 'selected' : '' %>>Movie</option>
+        <option value="anime" <%= movie.type === 'anime' ? 'selected' : '' %>>Anime Movie</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="poster">Poster (1200x1809)</label>
+      <input type="file" id="poster" name="poster" accept="image/jpeg,image/png">
+      <small>Leave empty to keep current poster</small>
+    </div>
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea id="description" name="description" rows="4" required><%= movie.description %></textarea>
+    </div>
+    
+    <div id="servers-container">
+      <h3>Streaming Servers</h3>
+      <% movie.servers.forEach((server, index) => { %>
+        <div class="server-entry">
+          <div class="form-group">
+            <label>Server <%= index + 1 %></label>
+            <input type="text" name="servers[<%= index %>][name]" value="<%= server.server_name %>" placeholder="Server name" required>
+            <input type="text" name="servers[<%= index %>][url]" value="<%= server.embed_url %>" placeholder="Embed URL" required>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+    
+    <button type="button" class="btn" onclick="addServer()">Add Server</button>
+    <button type="submit" class="btn">Update Movie</button>
+  </form>
+</div>
+
+<script>
+let serverCount = <%= movie.servers.length %>;
+
+function addServer() {
+  serverCount++;
+  const container = document.getElementById('servers-container');
+  const serverDiv = document.createElement('div');
+  serverDiv.className = 'server-entry';
+  serverDiv.innerHTML = `
+    <div class="form-group">
+      <label>Server ${serverCount}</label>
+      <input type="text" name="servers[${serverCount-1}][name]" placeholder="Server name" required>
+      <input type="text" name="servers[${serverCount-1}][url]" placeholder="Embed URL" required>
+    </div>
+  `;
+  container.appendChild(serverDiv);
+}
+</script>
+
+<%- include('../partials/footer') %>

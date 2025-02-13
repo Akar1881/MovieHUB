@@ -19,108 +19,95 @@ if (!fs.existsSync(uploadsDir)) {
 const dbPath = path.join(dbDir, 'movies.db');
 const db = new sqlite3.Database(dbPath);
 
-function initDatabase() {
-  return new Promise((resolve, reject) => {
-    db.serialize(() => {
-      // Users table
-      db.run(`CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL,
-        email TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL,
-        is_admin INTEGER DEFAULT 0,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )`);
-
-      // Movies table
-      db.run(`CREATE TABLE IF NOT EXISTS movies (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        type TEXT NOT NULL,
-        poster TEXT NOT NULL,
-        description TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )`);
-
-      // Movie servers table
-      db.run(`CREATE TABLE IF NOT EXISTS movie_servers (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        movie_id INTEGER,
-        server_name TEXT NOT NULL,
-        embed_url TEXT NOT NULL,
-        FOREIGN KEY(movie_id) REFERENCES movies(id) ON DELETE CASCADE
-      )`);
-
-      // TV Shows table
-      db.run(`CREATE TABLE IF NOT EXISTS tvshows (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        poster TEXT NOT NULL,
-        description TEXT,
-        seasons INTEGER NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )`);
-
-      // TV Show episodes table
-      db.run(`CREATE TABLE IF NOT EXISTS tvshow_episodes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        tvshow_id INTEGER,
-        season INTEGER NOT NULL,
-        episode INTEGER NOT NULL,
-        FOREIGN KEY(tvshow_id) REFERENCES tvshows(id) ON DELETE CASCADE
-      )`);
-
-      // Episode servers table
-      db.run(`CREATE TABLE IF NOT EXISTS episode_servers (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        episode_id INTEGER,
-        server_name TEXT NOT NULL,
-        embed_url TEXT NOT NULL,
-        FOREIGN KEY(episode_id) REFERENCES tvshow_episodes(id) ON DELETE CASCADE
-      )`);
-
-      // Reviews table
-      db.run(`CREATE TABLE IF NOT EXISTS reviews (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        content_id INTEGER,
-        content_type TEXT NOT NULL,
-        rating INTEGER NOT NULL,
-        comment TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
-      )`);
-
-      // Create admin account if it doesn't exist
-      const { email, password, username } = config.admin;
-      db.get('SELECT id FROM users WHERE email = ?', [email], (err, row) => {
-        if (!row) {
-          bcrypt.hash(password, 10, (err, hash) => {
-            db.run('INSERT INTO users (username, email, password, is_admin) VALUES (?, ?, ?, 1)',
-              [username, email, hash]);
-          });
-        }
-      });
-
-      resolve();
-    });
-  });
-}
-
-// Add getTVShowEpisodes function
-const getTVShowEpisodes = (tvshowId) => {
-  return new Promise((resolve, reject) => {
-    db.all('SELECT * FROM tvshow_episodes WHERE tvshow_id = ? ORDER BY season, episode', [tvshowId], (err, rows) => {
-      if (err) reject(err);
-      resolve(rows);
-    });
-  });
-};
-
-// Database operations
 const db_ops = {
-  initDatabase,
-  
+  initDatabase: () => {
+    return new Promise((resolve, reject) => {
+      db.serialize(() => {
+        // Users table
+        db.run(`CREATE TABLE IF NOT EXISTS users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          username TEXT UNIQUE NOT NULL,
+          email TEXT UNIQUE NOT NULL,
+          password TEXT NOT NULL,
+          is_admin INTEGER DEFAULT 0,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        // Movies table
+        db.run(`CREATE TABLE IF NOT EXISTS movies (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          type TEXT NOT NULL,
+          poster TEXT NOT NULL,
+          description TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        // Movie servers table
+        db.run(`CREATE TABLE IF NOT EXISTS movie_servers (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          movie_id INTEGER,
+          server_name TEXT NOT NULL,
+          embed_url TEXT NOT NULL,
+          FOREIGN KEY(movie_id) REFERENCES movies(id) ON DELETE CASCADE
+        )`);
+
+        // TV Shows table
+        db.run(`CREATE TABLE IF NOT EXISTS tvshows (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          poster TEXT NOT NULL,
+          description TEXT,
+          seasons INTEGER NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        // TV Show episodes table
+        db.run(`CREATE TABLE IF NOT EXISTS tvshow_episodes (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          tvshow_id INTEGER,
+          season INTEGER NOT NULL,
+          episode INTEGER NOT NULL,
+          FOREIGN KEY(tvshow_id) REFERENCES tvshows(id) ON DELETE CASCADE
+        )`);
+
+        // Episode servers table
+        db.run(`CREATE TABLE IF NOT EXISTS episode_servers (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          episode_id INTEGER,
+          server_name TEXT NOT NULL,
+          embed_url TEXT NOT NULL,
+          FOREIGN KEY(episode_id) REFERENCES tvshow_episodes(id) ON DELETE CASCADE
+        )`);
+
+        // Reviews table
+        db.run(`CREATE TABLE IF NOT EXISTS reviews (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER,
+          content_id INTEGER,
+          content_type TEXT NOT NULL,
+          rating INTEGER NOT NULL,
+          comment TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        )`);
+
+        // Create admin account if it doesn't exist
+        const { email, password, username } = config.admin;
+        db.get('SELECT id FROM users WHERE email = ?', [email], (err, row) => {
+          if (!row) {
+            bcrypt.hash(password, 10, (err, hash) => {
+              db.run('INSERT INTO users (username, email, password, is_admin) VALUES (?, ?, ?, 1)',
+                [username, email, hash]);
+            });
+          }
+        });
+
+        resolve();
+      });
+    });
+  },
+
   // User operations
   createUser: (username, email, password) => {
     return new Promise((resolve, reject) => {
@@ -163,26 +150,6 @@ const db_ops = {
     });
   },
 
-  getUserReviews: (userId) => {
-    return new Promise((resolve, reject) => {
-      db.all(`
-        SELECT r.*, 
-          CASE 
-            WHEN r.content_type = 'movie' THEN m.title 
-            ELSE t.title 
-          END as title
-        FROM reviews r
-        LEFT JOIN movies m ON r.content_type = 'movie' AND r.content_id = m.id
-        LEFT JOIN tvshows t ON r.content_type = 'tvshow' AND r.content_id = t.id
-        WHERE r.user_id = ?
-        ORDER BY r.created_at DESC
-      `, [userId], (err, rows) => {
-        if (err) reject(err);
-        resolve(rows);
-      });
-    });
-  },
-
   // Movie operations
   addMovie: (title, type, poster, description) => {
     return new Promise((resolve, reject) => {
@@ -194,6 +161,48 @@ const db_ops = {
     });
   },
 
+  updateMovie: (id, data) => {
+    return new Promise((resolve, reject) => {
+      const { title, type, description, poster } = data;
+      const updates = [];
+      const values = [];
+      
+      if (title) {
+        updates.push('title = ?');
+        values.push(title);
+      }
+      if (type) {
+        updates.push('type = ?');
+        values.push(type);
+      }
+      if (description) {
+        updates.push('description = ?');
+        values.push(description);
+      }
+      if (poster) {
+        updates.push('poster = ?');
+        values.push(poster);
+      }
+      
+      values.push(id);
+      
+      db.run(`UPDATE movies SET ${updates.join(', ')} WHERE id = ?`, values, (err) => {
+        if (err) reject(err);
+        resolve();
+      });
+    });
+  },
+
+  deleteMovie: (id) => {
+    return new Promise((resolve, reject) => {
+      db.run('DELETE FROM movies WHERE id = ?', [id], (err) => {
+        if (err) reject(err);
+        resolve();
+      });
+    });
+  },
+
+  // Movie servers
   addMovieServer: (movieId, serverName, embedUrl) => {
     return new Promise((resolve, reject) => {
       db.run('INSERT INTO movie_servers (movie_id, server_name, embed_url) VALUES (?, ?, ?)',
@@ -201,6 +210,15 @@ const db_ops = {
           if (err) reject(err);
           resolve();
         });
+    });
+  },
+
+  deleteMovieServers: (movieId) => {
+    return new Promise((resolve, reject) => {
+      db.run('DELETE FROM movie_servers WHERE movie_id = ?', [movieId], (err) => {
+        if (err) reject(err);
+        resolve();
+      });
     });
   },
 
@@ -215,6 +233,48 @@ const db_ops = {
     });
   },
 
+  updateTVShow: (id, data) => {
+    return new Promise((resolve, reject) => {
+      const { title, description, seasons, poster } = data;
+      const updates = [];
+      const values = [];
+      
+      if (title) {
+        updates.push('title = ?');
+        values.push(title);
+      }
+      if (description) {
+        updates.push('description = ?');
+        values.push(description);
+      }
+      if (seasons) {
+        updates.push('seasons = ?');
+        values.push(seasons);
+      }
+      if (poster) {
+        updates.push('poster = ?');
+        values.push(poster);
+      }
+      
+      values.push(id);
+      
+      db.run(`UPDATE tvshows SET ${updates.join(', ')} WHERE id = ?`, values, (err) => {
+        if (err) reject(err);
+        resolve();
+      });
+    });
+  },
+
+  deleteTVShow: (id) => {
+    return new Promise((resolve, reject) => {
+      db.run('DELETE FROM tvshows WHERE id = ?', [id], (err) => {
+        if (err) reject(err);
+        resolve();
+      });
+    });
+  },
+
+  // Episode operations
   addTVShowEpisode: (tvshowId, season, episode) => {
     return new Promise((resolve, reject) => {
       db.run('INSERT INTO tvshow_episodes (tvshow_id, season, episode) VALUES (?, ?, ?)',
@@ -225,6 +285,17 @@ const db_ops = {
     });
   },
 
+  updateTVShowEpisode: (id, season, episode) => {
+    return new Promise((resolve, reject) => {
+      db.run('UPDATE tvshow_episodes SET season = ?, episode = ? WHERE id = ?',
+        [season, episode, id], (err) => {
+          if (err) reject(err);
+          resolve();
+        });
+    });
+  },
+
+  // Episode servers
   addEpisodeServer: (episodeId, serverName, embedUrl) => {
     return new Promise((resolve, reject) => {
       db.run('INSERT INTO episode_servers (episode_id, server_name, embed_url) VALUES (?, ?, ?)',
@@ -235,10 +306,27 @@ const db_ops = {
     });
   },
 
-  // Get latest content
+  deleteEpisodeServers: (episodeId) => {
+    return new Promise((resolve, reject) => {
+      db.run('DELETE FROM episode_servers WHERE episode_id = ?', [episodeId], (err) => {
+        if (err) reject(err);
+        resolve();
+      });
+    });
+  },
+
+  // Get content
   getLatestMovies: () => {
     return new Promise((resolve, reject) => {
-      db.all('SELECT * FROM movies ORDER BY created_at DESC LIMIT 12', [], (err, rows) => {
+      db.all(`
+        SELECT m.*, 
+          COALESCE(AVG(r.rating), 0) as avgRating,
+          COUNT(r.id) as reviewCount
+        FROM movies m
+        LEFT JOIN reviews r ON r.content_id = m.id AND r.content_type = 'movie'
+        GROUP BY m.id
+        ORDER BY m.created_at DESC LIMIT 12
+      `, [], (err, rows) => {
         if (err) reject(err);
         resolve(rows);
       });
@@ -247,17 +335,32 @@ const db_ops = {
 
   getLatestTVShows: () => {
     return new Promise((resolve, reject) => {
-      db.all('SELECT * FROM tvshows ORDER BY created_at DESC LIMIT 12', [], (err, rows) => {
+      db.all(`
+        SELECT t.*, 
+          COALESCE(AVG(r.rating), 0) as avgRating,
+          COUNT(r.id) as reviewCount
+        FROM tvshows t
+        LEFT JOIN reviews r ON r.content_id = t.id AND r.content_type = 'tvshow'
+        GROUP BY t.id
+        ORDER BY t.created_at DESC LIMIT 12
+      `, [], (err, rows) => {
         if (err) reject(err);
         resolve(rows);
       });
     });
   },
 
-  // Get all content
   getAllMovies: () => {
     return new Promise((resolve, reject) => {
-      db.all('SELECT * FROM movies ORDER BY created_at DESC', [], (err, rows) => {
+      db.all(`
+        SELECT m.*, 
+          COALESCE(AVG(r.rating), 0) as avgRating,
+          COUNT(r.id) as reviewCount
+        FROM movies m
+        LEFT JOIN reviews r ON r.content_id = m.id AND r.content_type = 'movie'
+        GROUP BY m.id
+        ORDER BY m.created_at DESC
+      `, [], (err, rows) => {
         if (err) reject(err);
         resolve(rows);
       });
@@ -266,17 +369,32 @@ const db_ops = {
 
   getAllTVShows: () => {
     return new Promise((resolve, reject) => {
-      db.all('SELECT * FROM tvshows ORDER BY created_at DESC', [], (err, rows) => {
+      db.all(`
+        SELECT t.*, 
+          COALESCE(AVG(r.rating), 0) as avgRating,
+          COUNT(r.id) as reviewCount
+        FROM tvshows t
+        LEFT JOIN reviews r ON r.content_id = t.id AND r.content_type = 'tvshow'
+        GROUP BY t.id
+        ORDER BY t.created_at DESC
+      `, [], (err, rows) => {
         if (err) reject(err);
         resolve(rows);
       });
     });
   },
 
-  // Get single items
   getMovieById: (id) => {
     return new Promise((resolve, reject) => {
-      db.get('SELECT * FROM movies WHERE id = ?', [id], (err, row) => {
+      db.get(`
+        SELECT m.*, 
+          COALESCE(AVG(r.rating), 0) as avgRating,
+          COUNT(r.id) as reviewCount
+        FROM movies m
+        LEFT JOIN reviews r ON r.content_id = m.id AND r.content_type = 'movie'
+        WHERE m.id = ?
+        GROUP BY m.id
+      `, [id], (err, row) => {
         if (err) reject(err);
         resolve(row);
       });
@@ -285,14 +403,30 @@ const db_ops = {
 
   getTVShowById: (id) => {
     return new Promise((resolve, reject) => {
-      db.get('SELECT * FROM tvshows WHERE id = ?', [id], (err, row) => {
+      db.get(`
+        SELECT t.*, 
+          COALESCE(AVG(r.rating), 0) as avgRating,
+          COUNT(r.id) as reviewCount
+        FROM tvshows t
+        LEFT JOIN reviews r ON r.content_id = t.id AND r.content_type = 'tvshow'
+        WHERE t.id = ?
+        GROUP BY t.id
+      `, [id], (err, row) => {
         if (err) reject(err);
         resolve(row);
       });
     });
   },
 
-  // Get servers
+  getTVShowEpisodes: (tvshowId) => {
+    return new Promise((resolve, reject) => {
+      db.all('SELECT * FROM tvshow_episodes WHERE tvshow_id = ? ORDER BY season, episode', [tvshowId], (err, rows) => {
+        if (err) reject(err);
+        resolve(rows);
+      });
+    });
+  },
+
   getMovieServers: (movieId) => {
     return new Promise((resolve, reject) => {
       db.all('SELECT * FROM movie_servers WHERE movie_id = ?', [movieId], (err, rows) => {
@@ -352,46 +486,61 @@ const db_ops = {
     });
   },
 
-  getTVShowEpisodes,
+  getUserReviews: (userId) => {
+    return new Promise((resolve, reject) => {
+      db.all(`
+        SELECT r.*, 
+          CASE 
+            WHEN r.content_type = 'movie' THEN m.title 
+            ELSE t.title 
+          END as title
+        FROM reviews r
+        LEFT JOIN movies m ON r.content_type = 'movie' AND r.content_id = m.id
+        LEFT JOIN tvshows t ON r.content_type = 'tvshow' AND r.content_id = t.id
+        WHERE r.user_id = ?
+        ORDER BY r.created_at DESC
+      `, [userId], (err, rows) => {
+        if (err) reject(err);
+        resolve(rows);
+      });
+    });
+  },
 
-  // Search functions
+  // Search
   searchMovies: (query) => {
     return new Promise((resolve, reject) => {
       const searchTerm = `%${query}%`;
-      db.all('SELECT * FROM movies WHERE title LIKE ? ORDER BY title ASC',
-        [searchTerm], (err, rows) => {
-          if (err) reject(err);
-          resolve(rows);
-        });
+      db.all(`
+        SELECT m.*, 
+          COALESCE(AVG(r.rating), 0) as avgRating,
+          COUNT(r.id) as reviewCount
+        FROM movies m
+        LEFT JOIN reviews r ON r.content_id = m.id AND r.content_type = 'movie'
+        WHERE m.title LIKE ?
+        GROUP BY m.id
+        ORDER BY m.title ASC
+      `, [searchTerm], (err, rows) => {
+        if (err) reject(err);
+        resolve(rows);
+      });
     });
   },
 
   searchTVShows: (query) => {
     return new Promise((resolve, reject) => {
       const searchTerm = `%${query}%`;
-      db.all('SELECT * FROM tvshows WHERE title LIKE ? ORDER BY title ASC',
-        [searchTerm], (err, rows) => {
-          if (err) reject(err);
-          resolve(rows);
-        });
-    });
-  },
-
-  // Delete operations
-  deleteMovie: (id) => {
-    return new Promise((resolve, reject) => {
-      db.run('DELETE FROM movies WHERE id = ?', [id], (err) => {
+      db.all(`
+        SELECT t.*, 
+          COALESCE(AVG(r.rating), 0) as avgRating,
+          COUNT(r.id) as reviewCount
+        FROM tvshows t
+        LEFT JOIN reviews r ON r.content_id = t.id AND r.content_type = 'tvshow'
+        WHERE t.title LIKE ?
+        GROUP BY t.id
+        ORDER BY t.title ASC
+      `, [searchTerm], (err, rows) => {
         if (err) reject(err);
-        resolve();
-      });
-    });
-  },
-
-  deleteTVShow: (id) => {
-    return new Promise((resolve, reject) => {
-      db.run('DELETE FROM tvshows WHERE id = ?', [id], (err) => {
-        if (err) reject(err);
-        resolve();
+        resolve(rows);
       });
     });
   }

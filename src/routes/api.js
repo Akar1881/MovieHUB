@@ -15,13 +15,19 @@ router.get('/search', async (req, res) => {
             db.searchTVShows(query)
         ]);
 
-        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-            res.json({ movies, tvshows });
-        } else {
-            res.render('search-results', { movies, tvshows, query });
-        }
+        res.json({ movies, tvshows });
     } catch (err) {
         res.status(500).json({ error: 'Search failed' });
+    }
+});
+
+// Get episode servers
+router.get('/episodes/:id/servers', async (req, res) => {
+    try {
+        const servers = await db.getEpisodeServers(req.params.id);
+        res.json(servers);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to get servers' });
     }
 });
 

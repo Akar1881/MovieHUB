@@ -2,18 +2,58 @@
 
 <div class="container">
     <h1>Movies</h1>
+    
+    <div class="filter-controls">
+        <select id="sort-select" class="filter-select">
+            <option value="latest">Latest</option>
+            <option value="oldest">Oldest</option>
+            <option value="rating">Highest Rated</option>
+        </select>
+    </div>
+
     <div class="content-grid">
         <% movies.forEach(movie => { %>
-            <div class="content-card">
+            <div class="content-card" data-rating="<%= movie.avgRating || 0 %>" data-date="<%= movie.created_at %>">
                 <a href="/movies/<%= movie.id %>">
                     <img src="<%= movie.poster %>" alt="<%= movie.title %>">
                     <div class="content-info">
                         <h3><%= movie.title %></h3>
+                        <div class="rating-display">
+                            <div class="rating-stars">
+                                <% for(let i = 1; i <= 5; i++) { %>
+                                    <i class="fas fa-star<%= i <= (movie.avgRating || 0) ? '' : '-o' %>"></i>
+                                <% } %>
+                            </div>
+                            <span class="rating-number"><%= (movie.avgRating || 0).toFixed(1) %></span>
+                        </div>
                     </div>
                 </a>
             </div>
         <% }); %>
     </div>
 </div>
+
+<script>
+const sortSelect = document.getElementById('sort-select');
+const contentGrid = document.querySelector('.content-grid');
+
+function sortMovies(criteria) {
+    const movies = Array.from(contentGrid.children);
+    
+    movies.sort((a, b) => {
+        if (criteria === 'latest') {
+            return new Date(b.dataset.date) - new Date(a.dataset.date);
+        } else if (criteria === 'oldest') {
+            return new Date(a.dataset.date) - new Date(b.dataset.date);
+        } else if (criteria === 'rating') {
+            return parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating);
+        }
+    });
+    
+    movies.forEach(movie => contentGrid.appendChild(movie));
+}
+
+sortSelect.addEventListener('change', (e) => sortMovies(e.target.value));
+</script>
 
 <%- include('../partials/footer') %>

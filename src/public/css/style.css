@@ -396,3 +396,126 @@ body {
   outline: none;
   border-color: var(--primary);
 }
+
+/* Search Bar Improvements */
+.search-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.search-results {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 1rem;
+}
+
+.search-result {
+  padding: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.search-result:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.search-result a {
+  color: var(--text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.search-result img {
+  width: 40px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+/* Filter Controls */
+.filter-controls {
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: var(--secondary);
+  border-radius: 8px;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.filter-select {
+  padding: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: var(--text);
+  min-width: 150px;
+}
+
+/* Reviews Container */
+.reviews-container {
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 1rem;
+  margin: 1rem 0;
+}
+
+/* Rating Display */
+.rating-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.rating-stars {
+  color: #ffd700;
+  font-size: 1.2rem;
+}
+
+.rating-number {
+  color: var(--text);
+  font-weight: bold;
+}
+
+/* Season/Episode Selection */
+.episode-selector {
+  margin: 1rem 0;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.episode-selector select {
+  padding: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: var(--text);
+  min-width: 200px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .filter-controls {
+    flex-direction: column;
+  }
+  
+  .filter-select {
+    width: 100%;
+  }
+  
+  .episode-selector {
+    flex-direction: column;
+  }
+  
+  .episode-selector select {
+    width: 100%;
+  }
+}

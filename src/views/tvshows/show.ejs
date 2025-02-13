@@ -8,17 +8,36 @@
         </div>
         <div class="tvshow-info">
             <h1><%= tvshow.title %></h1>
+            <div class="rating-display">
+                <div class="rating-stars">
+                    <% const avgRating = reviews.reduce((acc, rev) => acc + rev.rating, 0) / reviews.length || 0; %>
+                    <% for(let i = 1; i <= 5; i++) { %>
+                        <i class="fas fa-star<%= i <= avgRating ? '' : '-o' %>"></i>
+                    <% } %>
+                </div>
+                <span class="rating-number"><%= avgRating.toFixed(1) %>/5</span>
+                <span>(<%= reviews.length %> reviews)</span>
+            </div>
             <p class="tvshow-description"><%= tvshow.description %></p>
             <p class="tvshow-seasons">Seasons: <%= tvshow.seasons %></p>
             
             <div class="tvshow-episodes">
                 <h3>Episodes</h3>
-                <% episodes.forEach(episode => { %>
-                    <div class="episode">
-                        <h4>Season <%= episode.season %> Episode <%= episode.episode %></h4>
-                        <a href="/tvshows/<%= tvshow.id %>/episode/<%= episode.id %>" class="btn">Watch</a>
-                    </div>
-                <% }); %>
+                <div class="episode-selector">
+                    <select id="season-select" class="filter-select">
+                        <option value="">Select Season</option>
+                        <% for(let i = 1; i <= tvshow.seasons; i++) { %>
+                            <option value="<%= i %>">Season <%= i %></option>
+                        <% } %>
+                    </select>
+                    <select id="episode-select" class="filter-select" disabled>
+                        <option value="">Select Episode</option>
+                    </select>
+                    <select id="server-select" class="filter-select" disabled>
+                        <option value="">Select Server</option>
+                    </select>
+                </div>
+                <div id="episode-player" class="embed-container" style="display: none;"></div>
             </div>
 
             <div class="tvshow-reviews">
@@ -43,23 +62,89 @@
                     </form>
                 <% } %>
 
-                <div class="reviews-list">
-                    <% reviews.forEach(review => { %>
-                        <div class="review">
-                            <div class="review-header">
-                                <span class="review-author"><%= review.username %></span>
-                                <span class="review-rating"><%= review.rating %> stars</span>
+                <div class="reviews-container">
+                    <div class="reviews-list">
+                        <% reviews.forEach(review => { %>
+                            <div class="review">
+                                <div class="review-header">
+                                    <span class="review-author"><%= review.username %></span>
+                                    <span class="review-rating">
+                                        <% for(let i = 1; i <= 5; i++) { %>
+                                            <i class="fas fa-star<%= i <= review.rating ? '' : '-o' %>"></i>
+                                        <% } %>
+                                    </span>
+                                </div>
+                                <p class="review-comment"><%= review.comment %></p>
+                                <small class="review-date">
+                                    <%= new Date(review.created_at).toLocaleDateString() %>
+                                </small>
                             </div>
-                            <p class="review-comment"><%= review.comment %></p>
-                            <small class="review-date">
-                                <%= new Date(review.created_at).toLocaleDateString() %>
-                            </small>
-                        </div>
-                    <% }); %>
+                        <% }); %>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+const seasonSelect = document.getElementById('season-select');
+const episodeSelect = document.getElementById('episode-select');
+const serverSelect = document.getElementById('server-select');
+const episodePlayer = document.getElementById('episode-player');
+
+const episodes = <%- JSON.stringify(episodes) %>;
+
+seasonSelect.addEventListener('change', function() {
+    const season = this.value;
+    episodeSelect.innerHTML = '<option value="">Select Episode</option>';
+    serverSelect.innerHTML = '<option value="">Select Server</option>';
+    episodePlayer.style.display = 'none';
+    
+    if (season) {
+        const seasonEpisodes = episodes.filter(ep => ep.season == season);
+        seasonEpisodes.forEach(ep => {
+            const option = document.createElement('option');
+            option.value = ep.id;
+            option.textContent = `Episode ${ep.episode}`;
+            episodeSelect.appendChild(option);
+        });
+        episodeSelect.disabled = false;
+    } else {
+        episodeSelect.disabled = true;
+        serverSelect.disabled = true;
+    }
+});
+
+episodeSelect.addEventListener('change', async function() {
+    const episodeId = this.value;
+    serverSelect.innerHTML = '<option value="">Select Server</option>';
+    episodePlayer.style.display = 'none';
+    
+    if (episodeId) {
+        const response = await fetch(`/api/episodes/${episodeId}/servers`);
+        const servers = await response.json();
+        servers.forEach(server => {
+            const option = document.createElement('option');
+            option.value = server.embed_url;
+            option.textContent = server.server_name;
+            serverSelect.appendChild(option);
+        });
+        serverSelect.disabled = false;
+    } else {
+        serverSelect.disabled = true;
+    }
+});
+
+serverSelect.addEventListener('change', function() {
+    const embedUrl = this.value;
+    if (embedUrl) {
+        episodePlayer.innerHTML = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
+        episodePlayer.style.display = 'block';
+    } else {
+        episodePlayer.style.display = 'none';
+    }
+});
+</script>
 
 <%- include('../partials/footer') %>
