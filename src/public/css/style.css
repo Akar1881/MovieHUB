@@ -124,6 +124,7 @@ body {
   overflow: hidden;
   border-radius: 0.5rem;
   transition: transform 0.3s ease;
+  aspect-ratio: 2/3;
 }
 
 .content-card:hover {
@@ -132,8 +133,7 @@ body {
 
 .content-card img {
   width: 100%;
-  height: auto;
-  aspect-ratio: 1200/1809;
+  height: 100%;
   object-fit: cover;
 }
 
