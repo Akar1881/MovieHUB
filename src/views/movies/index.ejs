@@ -16,17 +16,13 @@
             <div class="content-card" data-rating="<%= movie.avgRating || 0 %>" data-date="<%= movie.created_at %>">
                 <a href="/movies/<%= movie.id %>">
                     <img src="<%= movie.poster %>" alt="<%= movie.title %>">
-                    <div class="content-info">
-                        <h3><%= movie.title %></h3>
-                        <div class="rating-display">
-                            <div class="rating-stars">
-                                <% for(let i = 1; i <= 5; i++) { %>
-                                    <i class="fas fa-star<%= i <= (movie.avgRating || 0) ? '' : '-o' %>"></i>
-                                <% } %>
-                            </div>
-                            <span class="rating-number"><%= (movie.avgRating || 0).toFixed(1) %></span>
-                        </div>
-                    </div>
+                    <% if (movie.avgRating > 0) { %>
+                      <div class="rating-badge">
+                        <i class="fas fa-star"></i>
+                        <%= movie.avgRating.toFixed(1) %>
+                      </div>
+                    <% } %>
+                    <div class="content-title"><%= movie.title %></div>
                 </a>
             </div>
         <% }); %>

@@ -16,17 +16,13 @@
             <div class="content-card" data-rating="<%= tvshow.avgRating || 0 %>" data-date="<%= tvshow.created_at %>">
                 <a href="/tvshows/<%= tvshow.id %>">
                     <img src="<%= tvshow.poster %>" alt="<%= tvshow.title %>">
-                    <div class="content-info">
-                        <h3><%= tvshow.title %></h3>
-                        <div class="rating-display">
-                            <div class="rating-stars">
-                                <% for(let i = 1; i <= 5; i++) { %>
-                                    <i class="fas fa-star<%= i <= (tvshow.avgRating || 0) ? '' : '-o' %>"></i>
-                                <% } %>
-                            </div>
-                            <span class="rating-number"><%= (tvshow.avgRating || 0).toFixed(1) %></span>
-                        </div>
-                    </div>
+                    <% if (tvshow.avgRating > 0) { %>
+                      <div class="rating-badge">
+                        <i class="fas fa-star"></i>
+                        <%= tvshow.avgRating.toFixed(1) %>
+                      </div>
+                    <% } %>
+                    <div class="content-title"><%= tvshow.title %></div>
                 </a>
             </div>
         <% }); %>

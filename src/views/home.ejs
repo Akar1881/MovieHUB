@@ -1,47 +1,86 @@
 <%- include('partials/header') %>
 <link rel="stylesheet" href="/css/home.css">
 
-<section class="hero">
-  <div class="container">
-    <h1>Welcome to <%= config.site.name %></h1>
-    <p><%= config.site.description %></p>
-  </div>
-</section>
-
-<section class="latest-movies">
-  <div class="container">
+<div class="container">
+  <section class="movie-section">
     <h2>Latest Movies</h2>
-    <div class="content-grid">
-      <% movies.forEach(movie => { %>
+    <div class="horizontal-scroll">
+      <% movies.slice(0, 10).forEach(movie => { %>
         <div class="content-card">
           <a href="/movies/<%= movie.id %>">
             <img src="<%= movie.poster %>" alt="<%= movie.title %>">
-            <div class="content-info">
-              <h3><%= movie.title %></h3>
-            </div>
+            <% if (movie.avgRating > 0) { %>
+              <div class="rating-badge">
+                <i class="fas fa-star"></i>
+                <%= movie.avgRating.toFixed(1) %>
+              </div>
+            <% } %>
+            <div class="content-title"><%= movie.title %></div>
           </a>
         </div>
       <% }); %>
     </div>
-  </div>
-</section>
+  </section>
 
-<section class="latest-tvshows">
-  <div class="container">
+  <section class="movie-section">
     <h2>Latest TV Shows</h2>
-    <div class="content-grid">
-      <% tvshows.forEach(tvshow => { %>
+    <div class="horizontal-scroll">
+      <% tvshows.slice(0, 10).forEach(tvshow => { %>
         <div class="content-card">
           <a href="/tvshows/<%= tvshow.id %>">
             <img src="<%= tvshow.poster %>" alt="<%= tvshow.title %>">
-            <div class="content-info">
-              <h3><%= tvshow.title %></h3>
-            </div>
+            <% if (tvshow.avgRating > 0) { %>
+              <div class="rating-badge">
+                <i class="fas fa-star"></i>
+                <%= tvshow.avgRating.toFixed(1) %>
+              </div>
+            <% } %>
+            <div class="content-title"><%= tvshow.title %></div>
           </a>
         </div>
       <% }); %>
     </div>
-  </div>
-</section>
+  </section>
+
+  <section class="movie-section">
+    <h2>Top Rated Movies</h2>
+    <div class="horizontal-scroll">
+      <% movies.sort((a, b) => b.avgRating - a.avgRating).slice(0, 10).forEach(movie => { %>
+        <div class="content-card">
+          <a href="/movies/<%= movie.id %>">
+            <img src="<%= movie.poster %>" alt="<%= movie.title %>">
+            <% if (movie.avgRating > 0) { %>
+              <div class="rating-badge">
+                <i class="fas fa-star"></i>
+                <%= movie.avgRating.toFixed(1) %>
+              </div>
+            <% } %>
+            <div class="content-title"><%= movie.title %></div>
+          </a>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+
+  <section class="movie-section">
+    <h2>Oldest Movies</h2>
+    <div class="horizontal-scroll">
+      <% movies.sort((a, b) => new Date(a.created_at) - new Date(b.created_at)).slice(0, 10).forEach(movie => { %>
+        <div class="content-card">
+          <a href="/movies/<%= movie.id %>">
+            <img src="<%= movie.poster %>" alt="<%= movie.title %>">
+            <% if (movie.avgRating > 0) { %>
+              <div class="rating-badge">
+                <i class="fas fa-star"></i>
+                <%= movie.avgRating.toFixed(1) %>
+              </div>
+            <% } %>
+            <div class="content-title"><%= movie.title %></div>
+          </a>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+</div>
 
 <%- include('partials/footer') %>

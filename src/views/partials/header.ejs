@@ -13,7 +13,7 @@
             <nav class="nav-menu">
                 <div class="logo">
                     <a href="/">
-                        <img src="<%= config.site.logo %>" alt="<%= config.site.name %>">
+                        <img src="/images/logo.png" alt="<%= config.site.name %>">
                     </a>
                 </div>
                 <div class="search-container">
@@ -64,10 +64,12 @@
                     <i class="fas fa-user"></i>
                     <span>Profile</span>
                 </a>
-                <a href="/auth/logout" class="nav-item">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </a>
+                <form action="/auth/logout" method="POST" style="margin: 0;">
+                    <button type="submit" class="nav-item" style="width: 100%; background: none; border: none; cursor: pointer; text-align: left;">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </button>
+                </form>
             <% } else { %>
                 <a href="/auth/login" class="nav-item">
                     <i class="fas fa-sign-in-alt"></i>
@@ -82,4 +84,3 @@
     </aside>
 
     <main class="main-content">
-</main>

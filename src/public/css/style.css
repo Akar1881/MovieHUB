@@ -26,6 +26,97 @@ body {
   padding: 0 1rem;
 }
 
+/* Content Grid */
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.content-card {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+  background-color: var(--secondary);
+  aspect-ratio: 2/3;
+}
+
+.content-card:hover {
+  transform: translateY(-5px);
+}
+
+.content-card a {
+  text-decoration: none;
+  color: var(--text);
+}
+
+.content-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.content-title {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.8);
+  color: var(--primary);
+  text-align: center;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rating-badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(0, 0, 0, 0.8);
+  color: var(--primary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.rating-badge i {
+  font-size: 0.875rem;
+}
+
+/* Filter Controls */
+.filter-controls {
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: var(--secondary);
+  border-radius: 8px;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.filter-select {
+  padding: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--primary);
+  border-radius: 4px;
+  color: var(--text);
+  min-width: 150px;
+  cursor: pointer;
+}
+
+.filter-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+}
+
 /* Header & Navigation */
 .header {
   background-color: var(--secondary);
@@ -85,11 +176,12 @@ body {
 
 .search-input {
   width: 100%;
-  padding: 0.5rem;
-  border: none;
-  border-radius: 0.25rem;
-  background-color: rgba(255, 255, 255, 0.1);
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.05);
   color: var(--text);
+  font-size: 1rem;
 }
 
 .search-results {
@@ -110,46 +202,6 @@ body {
   margin-left: 60px;
   margin-top: 60px;
   padding: 1rem;
-}
-
-.content-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 1rem;
-  padding: 1rem 0;
-}
-
-.content-card {
-  position: relative;
-  overflow: hidden;
-  border-radius: 0.5rem;
-  transition: transform 0.3s ease;
-  aspect-ratio: 2/3;
-}
-
-.content-card:hover {
-  transform: translateY(-5px);
-}
-
-.content-card img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.content-info {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 1rem;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
-}
-
-.content-info h3 {
-  color: var(--text);
-  font-size: 0.9rem;
-  margin: 0;
 }
 
 /* Sidebar */
@@ -248,8 +300,20 @@ body {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Page Headers */
+.container > h1 {
+  color: var(--primary);
+  margin: 1rem 0;
+  font-size: 2rem;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
+  .content-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.75rem;
+  }
+
   .sidebar {
     bottom: 0;
     top: auto;
@@ -282,7 +346,6 @@ body {
     display: block !important;
   }
 
-  /* Remove hover effects on mobile */
   .sidebar:hover {
     width: 100%;
   }
@@ -295,227 +358,10 @@ body {
   .main-content {
     margin-left: 0;
     margin-bottom: 60px;
-    padding: 1rem;
   }
 
   .footer {
     margin-left: 0;
     margin-bottom: 60px;
-    padding: 1rem;
-  }
-
-  .search-bar {
-    position: fixed;
-    top: 60px;
-    left: 0;
-    right: 0;
-    width: 100%;
-    max-height: calc(100vh - 60px);
-    border-radius: 0;
-    margin: 0;
-  }
-
-  .content-grid {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 0.75rem;
-  }
-
-  .content-info h3 {
-    font-size: 0.8rem;
-  }
-}
-
-/* Utility Classes */
-.hidden {
-  display: none;
-}
-
-.text-primary {
-  color: var(--primary);
-}
-
-/* Add Search Results Styles */
-.search-results-page {
-  padding: 2rem 1rem;
-}
-
-.search-results-page h1 {
-  color: var(--primary);
-  margin-bottom: 2rem;
-  font-size: 1.8rem;
-}
-
-.search-section {
-  margin-bottom: 3rem;
-}
-
-.search-section h2 {
-  color: var(--primary);
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
-  border-bottom: 2px solid var(--primary);
-  padding-bottom: 0.5rem;
-}
-
-.no-results {
-  text-align: center;
-  padding: 2rem;
-  background-color: var(--secondary);
-  border-radius: 8px;
-}
-
-/* Server Selection Styles */
-.server-selector {
-  margin-bottom: 1rem;
-}
-
-.server-selector label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: var(--text);
-}
-
-.server-select {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: var(--secondary);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-  color: var(--primary);
-  font-size: 1rem;
-  cursor: pointer;
-}
-
-.server-select option {
-  background-color: var(--secondary);
-  color: var(--primary);
-  padding: 0.5rem;
-}
-
-.server-select:focus {
-  outline: none;
-  border-color: var(--primary);
-}
-
-/* Search Bar Improvements */
-.search-input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  background-color: rgba(255, 255, 255, 0.05);
-  color: var(--text);
-  font-size: 1rem;
-}
-
-.search-results {
-  max-height: 400px;
-  overflow-y: auto;
-  margin-top: 1rem;
-}
-
-.search-result {
-  padding: 0.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.search-result:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
-.search-result a {
-  color: var(--text);
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.search-result img {
-  width: 40px;
-  height: 60px;
-  object-fit: cover;
-  border-radius: 4px;
-}
-
-/* Filter Controls */
-.filter-controls {
-  margin: 1rem 0;
-  padding: 1rem;
-  background-color: var(--secondary);
-  border-radius: 8px;
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.filter-select {
-  padding: 0.5rem;
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  color: var(--text);
-  min-width: 150px;
-}
-
-/* Reviews Container */
-.reviews-container {
-  max-height: 500px;
-  overflow-y: auto;
-  padding-right: 1rem;
-  margin: 1rem 0;
-}
-
-/* Rating Display */
-.rating-display {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 1rem 0;
-}
-
-.rating-stars {
-  color: #ffd700;
-  font-size: 1.2rem;
-}
-
-.rating-number {
-  color: var(--text);
-  font-weight: bold;
-}
-
-/* Season/Episode Selection */
-.episode-selector {
-  margin: 1rem 0;
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.episode-selector select {
-  padding: 0.75rem;
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  color: var(--text);
-  min-width: 200px;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .filter-controls {
-    flex-direction: column;
-  }
-  
-  .filter-select {
-    width: 100%;
-  }
-  
-  .episode-selector {
-    flex-direction: column;
-  }
-  
-  .episode-selector select {
-    width: 100%;
   }
 }
