@@ -13,7 +13,7 @@
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: sans-serif;
   background-color: var(--background);
   color: var(--text);
   line-height: 1.6;

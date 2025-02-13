@@ -46,34 +46,38 @@
             <% }); %>
           </div>
           <button type="button" class="btn" onclick="addServer('<%= episode.id %>', <%= index %>)">Add Server</button>
+          <button type="button" class="btn btn-danger" onclick="deleteLastServer('<%= episode.id %>')">Delete Last Server</button>
         </div>
       <% }); %>
     </div>
     
     <button type="button" class="btn" onclick="addEpisode()">Add Episode</button>
+    <button type="button" class="btn btn-danger" onclick="deleteLastEpisode()">Delete Last Episode</button>
+    <button type="button" class="btn btn-danger" onclick="deleteLastSeason()">Delete Last Season</button>
     <button type="submit" class="btn">Update TV Show</button>
   </form>
 </div>
 
 <script>
 let episodeCount = <%= episodes.length %>;
+let seasonCount = <%= tvshow.seasons %>;
 
 function addEpisode() {
-  episodeCount++;
+  const season = document.getElementById('seasons').value;
   const container = document.getElementById('episodes-container');
+  
+  const seasonEpisodes = Array.from(container.children)
+    .filter(el => el.dataset.season === season);
+  const lastEpisodeNumber = seasonEpisodes.length + 1;
+  
   const episodeDiv = document.createElement('div');
   episodeDiv.className = 'episode-entry';
-  
-  const season = document.getElementById('seasons').value;
-  const lastEpisode = Array.from(container.children)
-    .filter(el => el.dataset.season === season)
-    .length + 1;
-  
   episodeDiv.dataset.season = season;
+  
   episodeDiv.innerHTML = `
-    <h4>Season ${season} Episode ${lastEpisode}</h4>
+    <h4>Season ${season} Episode ${lastEpisodeNumber}</h4>
     <input type="hidden" name="episodes[${episodeCount}][season]" value="${season}">
-    <input type="hidden" name="episodes[${episodeCount}][number]" value="${lastEpisode}">
+    <input type="hidden" name="episodes[${episodeCount}][number]" value="${lastEpisodeNumber}">
     <div id="episode-new-${episodeCount}-servers">
       <div class="server-entry">
         <div class="form-group">
@@ -84,8 +88,11 @@ function addEpisode() {
       </div>
     </div>
     <button type="button" class="btn" onclick="addServer('new-${episodeCount}', ${episodeCount})">Add Server</button>
+    <button type="button" class="btn btn-danger" onclick="deleteLastServer('new-${episodeCount}')">Delete Last Server</button>
   `;
+  
   container.appendChild(episodeDiv);
+  episodeCount++;
 }
 
 function addServer(episodeId, episodeIndex) {
@@ -101,6 +108,38 @@ function addServer(episodeId, episodeIndex) {
     </div>
   `;
   container.appendChild(serverDiv);
+}
+
+function deleteLastServer(episodeId) {
+  const container = document.getElementById(`episode-${episodeId}-servers`);
+  if (container.children.length > 1) {
+    container.removeChild(container.lastChild);
+  }
+}
+
+function deleteLastEpisode() {
+  const container = document.getElementById('episodes-container');
+  if (container.children.length > 0) {
+    container.removeChild(container.lastChild);
+    episodeCount--;
+  }
+}
+
+function deleteLastSeason() {
+  if (seasonCount > 1) {
+    const container = document.getElementById('episodes-container');
+    const episodes = Array.from(container.children);
+    const lastSeason = seasonCount;
+    
+    episodes.forEach(episode => {
+      if (parseInt(episode.dataset.season) === lastSeason) {
+        container.removeChild(episode);
+      }
+    });
+    
+    seasonCount--;
+    document.getElementById('seasons').value = seasonCount;
+  }
 }
 </script>
 

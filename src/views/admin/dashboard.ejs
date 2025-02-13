@@ -2,27 +2,29 @@
 <link rel="stylesheet" href="/css/dashboard.css">
 
 <div class="admin-grid">
-  <aside class="admin-sidebar">
-    <h3>Admin Menu</h3>
-    <ul>
-      <li><a href="/admin/movies/add" class="btn">Add Movie</a></li>
-      <li><a href="/admin/tvshows/add" class="btn">Add TV Show</a></li>
-    </ul>
-  </aside>
+  <div class="admin-search">
+    <input type="text" id="adminSearchInput" class="search-input" placeholder="Search movies and TV shows...">
+    <div class="filter-controls">
+      <select id="sortSelect" class="filter-select">
+        <option value="latest">Latest</option>
+        <option value="oldest">Oldest</option>
+        <option value="rating">Highest Rated</option>
+      </select>
+      <div class="add-buttons">
+        <a href="/admin/movies/add" class="btn btn-add">Add Movie</a>
+        <a href="/admin/tvshows/add" class="btn btn-add">Add TV Show</a>
+      </div>
+    </div>
+  </div>
   
   <main class="admin-content">
     <section class="admin-movies">
       <h2>Movies</h2>
-      <div class="content-grid">
+      <div class="content-grid" id="moviesGrid">
         <% movies.forEach(movie => { %>
-          <div class="content-card">
+          <div class="content-card" data-title="<%= movie.title.toLowerCase() %>" data-rating="<%= movie.avgRating || 0 %>" data-date="<%= movie.created_at %>" onclick="showActions('movie', '<%= movie.id %>', '<%= movie.title %>')">
             <img src="<%= movie.poster %>" alt="<%= movie.title %>">
-            <div class="content-actions">
-              <a href="/admin/movies/edit/<%= movie.id %>" class="btn">Edit</a>
-              <form action="/admin/movies/delete/<%= movie.id %>" method="POST" class="inline">
-                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
-              </form>
-            </div>
+            <div class="content-title"><%= movie.title %></div>
           </div>
         <% }); %>
       </div>
@@ -30,21 +32,115 @@
     
     <section class="admin-tvshows">
       <h2>TV Shows</h2>
-      <div class="content-grid">
+      <div class="content-grid" id="tvshowsGrid">
         <% tvshows.forEach(tvshow => { %>
-          <div class="content-card">
+          <div class="content-card" data-title="<%= tvshow.title.toLowerCase() %>" data-rating="<%= tvshow.avgRating || 0 %>" data-date="<%= tvshow.created_at %>" onclick="showActions('tvshow', '<%= tvshow.id %>', '<%= tvshow.title %>')">
             <img src="<%= tvshow.poster %>" alt="<%= tvshow.title %>">
-            <div class="content-actions">
-              <a href="/admin/tvshows/edit/<%= tvshow.id %>" class="btn">Edit</a>
-              <form action="/admin/tvshows/delete/<%= tvshow.id %>" method="POST" class="inline">
-                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
-              </form>
-            </div>
+            <div class="content-title"><%= tvshow.title %></div>
           </div>
         <% }); %>
       </div>
     </section>
   </main>
 </div>
+
+<div class="modal-actions" id="modalActions">
+  <a href="#" class="btn-edit" id="editButton">Edit</a>
+  <button class="btn-delete" id="deleteButton">Delete</button>
+  <button class="btn-cancel" onclick="hideActions()">Cancel</button>
+</div>
+
+<div class="delete-confirm" id="deleteConfirm">
+  <h3>Delete Confirmation</h3>
+  <p>Are you sure you want to delete "<span id="deleteTitle"></span>"?</p>
+  <div class="buttons">
+    <button class="btn-delete" id="confirmDelete">Confirm</button>
+    <button class="btn-cancel" onclick="hideDeleteConfirm()">Cancel</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+
+<script>
+let currentId = null;
+let currentType = null;
+
+function showActions(type, id, title) {
+  currentId = id;
+  currentType = type;
+  
+  const modal = document.getElementById('modalActions');
+  const editButton = document.getElementById('editButton');
+  editButton.href = `/admin/${type}s/edit/${id}`;
+  
+  modal.style.display = 'flex';
+  document.getElementById('overlay').style.display = 'block';
+}
+
+function hideActions() {
+  document.getElementById('modalActions').style.display = 'none';
+  document.getElementById('overlay').style.display = 'none';
+}
+
+function showDeleteConfirm() {
+  document.getElementById('deleteTitle').textContent = document.querySelector(`[onclick*="${currentId}"]`).querySelector('.content-title').textContent;
+  document.getElementById('deleteConfirm').style.display = 'block';
+  document.getElementById('modalActions').style.display = 'none';
+}
+
+function hideDeleteConfirm() {
+  document.getElementById('deleteConfirm').style.display = 'none';
+  document.getElementById('overlay').style.display = 'none';
+}
+
+document.getElementById('deleteButton').addEventListener('click', showDeleteConfirm);
+
+document.getElementById('confirmDelete').addEventListener('click', () => {
+  fetch(`/admin/${currentType}s/delete/${currentId}`, { method: 'POST' })
+    .then(() => window.location.reload());
+});
+
+const adminSearchInput = document.getElementById('adminSearchInput');
+const sortSelect = document.getElementById('sortSelect');
+const moviesGrid = document.getElementById('moviesGrid');
+const tvshowsGrid = document.getElementById('tvshowsGrid');
+
+function filterContent() {
+  const searchTerm = adminSearchInput.value.toLowerCase();
+  const sortBy = sortSelect.value;
+  
+  function filterGrid(grid) {
+    const items = Array.from(grid.children);
+    items.forEach(item => {
+      const title = item.dataset.title;
+      item.style.display = title.includes(searchTerm) ? '' : 'none';
+    });
+    
+    const visibleItems = items.filter(item => item.style.display !== 'none');
+    visibleItems.sort((a, b) => {
+      if (sortBy === 'latest') {
+        return new Date(b.dataset.date) - new Date(a.dataset.date);
+      } else if (sortBy === 'oldest') {
+        return new Date(a.dataset.date) - new Date(b.dataset.date);
+      } else if (sortBy === 'rating') {
+        return parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating);
+      }
+    });
+    
+    visibleItems.forEach(item => grid.appendChild(item));
+  }
+  
+  filterGrid(moviesGrid);
+  filterGrid(tvshowsGrid);
+}
+
+adminSearchInput.addEventListener('input', filterContent);
+sortSelect.addEventListener('change', filterContent);
+
+document.getElementById('overlay').addEventListener('click', () => {
+  hideActions();
+  hideDeleteConfirm();
+});
+</script>
 
 <%- include('../partials/footer') %>

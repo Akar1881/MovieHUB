@@ -38,9 +38,14 @@ const upload = multer({
 
 // Admin dashboard
 router.get('/', isAdmin, async (req, res) => {
-  const movies = await db.getLatestMovies();
-  const tvshows = await db.getLatestTVShows();
-  res.render('admin/dashboard', { movies, tvshows });
+  try {
+    const movies = await db.getLatestMovies();
+    const tvshows = await db.getLatestTVShows();
+    res.render('admin/dashboard', { movies, tvshows });
+  } catch (err) {
+    console.error('Dashboard error:', err);
+    res.render('admin/dashboard', { movies: [], tvshows: [], error: 'Failed to load content' });
+  }
 });
 
 // Add movie form
@@ -63,7 +68,8 @@ router.post('/movies/add', isAdmin, upload.single('poster'), async (req, res) =>
     
     res.redirect('/admin');
   } catch (err) {
-    res.render('admin/add-movie', { error: 'Failed to add movie' });
+    console.error('Add movie error:', err);
+    res.render('admin/add-movie', { error: 'Failed to add movie: ' + err.message });
   }
 });
 
@@ -71,10 +77,14 @@ router.post('/movies/add', isAdmin, upload.single('poster'), async (req, res) =>
 router.get('/movies/edit/:id', isAdmin, async (req, res) => {
   try {
     const movie = await db.getMovieById(req.params.id);
+    if (!movie) {
+      return res.redirect('/admin');
+    }
     const servers = await db.getMovieServers(req.params.id);
     movie.servers = servers;
     res.render('admin/edit-movie', { movie });
   } catch (err) {
+    console.error('Edit movie form error:', err);
     res.redirect('/admin');
   }
 });
@@ -82,15 +92,19 @@ router.get('/movies/edit/:id', isAdmin, async (req, res) => {
 // Update movie
 router.post('/movies/edit/:id', isAdmin, upload.single('poster'), async (req, res) => {
   try {
+    const movie = await db.getMovieById(req.params.id);
+    if (!movie) {
+      return res.redirect('/admin');
+    }
+
     const { title, type, description, servers } = req.body;
     const updateData = { title, type, description };
     
     if (req.file) {
       updateData.poster = '/uploads/' + req.file.filename;
       // Delete old poster
-      const oldMovie = await db.getMovieById(req.params.id);
-      if (oldMovie.poster) {
-        const oldPosterPath = path.join(__dirname, '../public', oldMovie.poster);
+      if (movie.poster) {
+        const oldPosterPath = path.join(__dirname, '../public', movie.poster);
         fs.unlink(oldPosterPath, () => {});
       }
     }
@@ -107,7 +121,11 @@ router.post('/movies/edit/:id', isAdmin, upload.single('poster'), async (req, re
     
     res.redirect('/admin');
   } catch (err) {
-    res.render('admin/edit-movie', { error: 'Failed to update movie' });
+    console.error('Update movie error:', err);
+    const movie = await db.getMovieById(req.params.id);
+    const servers = await db.getMovieServers(req.params.id);
+    movie.servers = servers;
+    res.render('admin/edit-movie', { movie, error: 'Failed to update movie: ' + err.message });
   }
 });
 
@@ -115,13 +133,14 @@ router.post('/movies/edit/:id', isAdmin, upload.single('poster'), async (req, re
 router.post('/movies/delete/:id', isAdmin, async (req, res) => {
   try {
     const movie = await db.getMovieById(req.params.id);
-    if (movie.poster) {
+    if (movie && movie.poster) {
       const posterPath = path.join(__dirname, '../public', movie.poster);
       fs.unlink(posterPath, () => {});
     }
     await db.deleteMovie(req.params.id);
     res.redirect('/admin');
   } catch (err) {
+    console.error('Delete movie error:', err);
     res.redirect('/admin');
   }
 });
@@ -134,24 +153,36 @@ router.get('/tvshows/add', isAdmin, (req, res) => {
 // Add TV show process
 router.post('/tvshows/add', isAdmin, upload.single('poster'), async (req, res) => {
   try {
-    const { title, description, seasons } = req.body;
+    const { title, description, seasons, episodes } = req.body;
+    
+    if (!episodes || !Array.isArray(episodes)) {
+      throw new Error('No episodes provided');
+    }
+
     const poster = '/uploads/' + req.file.filename;
     const tvshowId = await db.addTVShow(title, poster, description, seasons);
     
     // Handle episodes and servers
-    const episodes = req.body.episodes || [];
     for (const episode of episodes) {
+      if (!episode.season || !episode.number) {
+        continue;
+      }
+      
       const episodeId = await db.addTVShowEpisode(tvshowId, episode.season, episode.number);
-      if (episode.servers) {
+      
+      if (episode.servers && Array.isArray(episode.servers)) {
         for (const server of episode.servers) {
-          await db.addEpisodeServer(episodeId, server.name, server.url);
+          if (server.name && server.url) {
+            await db.addEpisodeServer(episodeId, server.name, server.url);
+          }
         }
       }
     }
     
     res.redirect('/admin');
   } catch (err) {
-    res.render('admin/add-tvshow', { error: 'Failed to add TV show' });
+    console.error('Add TV show error:', err);
+    res.render('admin/add-tvshow', { error: 'Failed to add TV show: ' + err.message });
   }
 });
 
@@ -159,6 +190,9 @@ router.post('/tvshows/add', isAdmin, upload.single('poster'), async (req, res) =
 router.get('/tvshows/edit/:id', isAdmin, async (req, res) => {
   try {
     const tvshow = await db.getTVShowById(req.params.id);
+    if (!tvshow) {
+      return res.redirect('/admin');
+    }
     const episodes = await db.getTVShowEpisodes(req.params.id);
     
     // Get servers for each episode
@@ -168,6 +202,7 @@ router.get('/tvshows/edit/:id', isAdmin, async (req, res) => {
     
     res.render('admin/edit-tvshow', { tvshow, episodes });
   } catch (err) {
+    console.error('Edit TV show form error:', err);
     res.redirect('/admin');
   }
 });
@@ -175,45 +210,89 @@ router.get('/tvshows/edit/:id', isAdmin, async (req, res) => {
 // Update TV show
 router.post('/tvshows/edit/:id', isAdmin, upload.single('poster'), async (req, res) => {
   try {
-    const { title, description, seasons, episodes } = req.body;
+    const tvshow = await db.getTVShowById(req.params.id);
+    if (!tvshow) {
+      throw new Error('TV show not found');
+    }
+
+    const { title, description, seasons } = req.body;
     const updateData = { title, description, seasons };
     
     if (req.file) {
       updateData.poster = '/uploads/' + req.file.filename;
       // Delete old poster
-      const oldTVShow = await db.getTVShowById(req.params.id);
-      if (oldTVShow.poster) {
-        const oldPosterPath = path.join(__dirname, '../public', oldTVShow.poster);
+      if (tvshow.poster) {
+        const oldPosterPath = path.join(__dirname, '../public', tvshow.poster);
         fs.unlink(oldPosterPath, () => {});
       }
     }
     
     await db.updateTVShow(req.params.id, updateData);
     
-    // Update episodes and servers
-    if (episodes) {
-      for (const episode of episodes) {
-        if (episode.id) {
-          // Update existing episode
-          await db.updateTVShowEpisode(episode.id, episode.season, episode.number);
-          await db.deleteEpisodeServers(episode.id);
-        } else {
-          // Add new episode
-          episode.id = await db.addTVShowEpisode(req.params.id, episode.season, episode.number);
-        }
-        
-        // Add servers for the episode
-        if (episode.servers) {
-          for (const server of episode.servers) {
-            await db.addEpisodeServer(episode.id, server.name, server.url);
+    // Process episodes data
+    const episodes = [];
+    if (req.body.episodes) {
+      for (const [index, episode] of Object.entries(req.body.episodes)) {
+        if (episode && episode.season && episode.number) {
+          const episodeData = {
+            id: episode.id || null,
+            season: parseInt(episode.season),
+            number: parseInt(episode.number),
+            servers: []
+          };
+
+          // Process servers for this episode
+          if (episode.servers) {
+            for (const server of Object.values(episode.servers)) {
+              if (server.name && server.url) {
+                episodeData.servers.push({
+                  name: server.name,
+                  url: server.url
+                });
+              }
+            }
           }
+          
+          episodes.push(episodeData);
         }
+      }
+    }
+    
+    // Update episodes and servers
+    for (const episode of episodes) {
+      let episodeId;
+      if (episode.id) {
+        await db.updateTVShowEpisode(episode.id, episode.season, episode.number);
+        await db.deleteEpisodeServers(episode.id);
+        episodeId = episode.id;
+      } else {
+        episodeId = await db.addTVShowEpisode(req.params.id, episode.season, episode.number);
+      }
+      
+      // Add servers for the episode
+      for (const server of episode.servers) {
+        await db.addEpisodeServer(episodeId, server.name, server.url);
       }
     }
     
     res.redirect('/admin');
   } catch (err) {
-    res.render('admin/edit-tvshow', { error: 'Failed to update TV show' });
+    console.error('Update TV show error:', err);
+    try {
+      const tvshow = await db.getTVShowById(req.params.id);
+      const episodes = await db.getTVShowEpisodes(req.params.id);
+      for (const episode of episodes) {
+        episode.servers = await db.getEpisodeServers(episode.id);
+      }
+      res.render('admin/edit-tvshow', { 
+        tvshow, 
+        episodes, 
+        error: 'Failed to update TV show: ' + err.message 
+      });
+    } catch (renderErr) {
+      console.error('Error rendering error page:', renderErr);
+      res.redirect('/admin');
+    }
   }
 });
 
@@ -221,13 +300,14 @@ router.post('/tvshows/edit/:id', isAdmin, upload.single('poster'), async (req, r
 router.post('/tvshows/delete/:id', isAdmin, async (req, res) => {
   try {
     const tvshow = await db.getTVShowById(req.params.id);
-    if (tvshow.poster) {
+    if (tvshow && tvshow.poster) {
       const posterPath = path.join(__dirname, '../public', tvshow.poster);
       fs.unlink(posterPath, () => {});
     }
     await db.deleteTVShow(req.params.id);
     res.redirect('/admin');
   } catch (err) {
+    console.error('Delete TV show error:', err);
     res.redirect('/admin');
   }
 });

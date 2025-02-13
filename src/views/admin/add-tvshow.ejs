@@ -6,7 +6,7 @@
   <% if (locals.error) { %>
     <div class="alert alert-error"><%= error %></div>
   <% } %>
-  <form action="/admin/tvshows/add" method="POST" enctype="multipart/form-data">
+  <form action="/admin/tvshows/add" method="POST" enctype="multipart/form-data" id="tvshowForm">
     <div class="form-group">
       <label for="title">Title</label>
       <input type="text" id="title" name="title" required>
@@ -54,41 +54,52 @@ function addSeason() {
 
 function addEpisode(season) {
   episodeCount[season]++;
+  const episodeIndex = episodeCount[season] - 1;
   const container = document.getElementById(`season-${season}-episodes`);
   const episodeDiv = document.createElement('div');
   episodeDiv.className = 'episode-entry';
   episodeDiv.innerHTML = `
     <h5>Episode ${episodeCount[season]}</h5>
-    <input type="hidden" name="episodes[][season]" value="${season}">
-    <input type="hidden" name="episodes[][number]" value="${episodeCount[season]}">
+    <input type="hidden" name="episodes[${episodeIndex}][season]" value="${season}">
+    <input type="hidden" name="episodes[${episodeIndex}][number]" value="${episodeCount[season]}">
     <div id="episode-${season}-${episodeCount[season]}-servers">
       <div class="server-entry">
         <div class="form-group">
           <label>Server 1</label>
-          <input type="text" name="episodes[][servers][][name]" placeholder="Server name" required>
-          <input type="text" name="episodes[][servers][][url]" placeholder="Embed URL" required>
+          <input type="text" name="episodes[${episodeIndex}][servers][0][name]" placeholder="Server name" required>
+          <input type="text" name="episodes[${episodeIndex}][servers][0][url]" placeholder="Embed URL" required>
         </div>
       </div>
     </div>
-    <button type="button" class="btn" onclick="addServer(${season}, ${episodeCount[season]})">Add Server</button>
+    <button type="button" class="btn" onclick="addServer(${season}, ${episodeCount[season]}, ${episodeIndex})">Add Server</button>
   `;
   container.appendChild(episodeDiv);
 }
 
-function addServer(season, episode) {
+function addServer(season, episode, episodeIndex) {
   const container = document.getElementById(`episode-${season}-${episode}-servers`);
-  const serverCount = container.children.length + 1;
+  const serverCount = container.children.length;
   const serverDiv = document.createElement('div');
   serverDiv.className = 'server-entry';
   serverDiv.innerHTML = `
     <div class="form-group">
-      <label>Server ${serverCount}</label>
-      <input type="text" name="episodes[][servers][][name]" placeholder="Server name" required>
-      <input type="text" name="episodes[][servers][][url]" placeholder="Embed URL" required>
+      <label>Server ${serverCount + 1}</label>
+      <input type="text" name="episodes[${episodeIndex}][servers][${serverCount}][name]" placeholder="Server name" required>
+      <input type="text" name="episodes[${episodeIndex}][servers][${serverCount}][url]" placeholder="Embed URL" required>
     </div>
   `;
   container.appendChild(serverDiv);
 }
+
+// Add form submission handler
+document.getElementById('tvshowForm').addEventListener('submit', function(e) {
+  if (seasonCount === 0) {
+    e.preventDefault();
+    alert('Please add at least one season with episodes');
+    return false;
+  }
+  return true;
+});
 </script>
 
 <%- include('../partials/footer') %>

@@ -42,6 +42,7 @@
     </div>
     
     <button type="button" class="btn" onclick="addServer()">Add Server</button>
+    <button type="button" class="btn btn-danger" onclick="deleteLastServer()">Delete Last Server</button>
     <button type="submit" class="btn">Update Movie</button>
   </form>
 </div>
@@ -62,6 +63,14 @@ function addServer() {
     </div>
   `;
   container.appendChild(serverDiv);
+}
+
+function deleteLastServer() {
+  if (serverCount > 1) {
+    const container = document.getElementById('servers-container');
+    container.removeChild(container.lastChild);
+    serverCount--;
+  }
 }
 </script>
 
