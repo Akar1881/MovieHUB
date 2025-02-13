@@ -23,55 +23,5 @@
             </div>
         </div>
     </footer>
-
-    <script>
-        // Search functionality
-        const searchIcon = document.getElementById('searchIcon');
-        const searchBar = document.getElementById('searchBar');
-        const searchInput = document.getElementById('searchInput');
-        const movieResults = document.getElementById('movieResults');
-        const tvshowResults = document.getElementById('tvshowResults');
-
-        searchIcon.addEventListener('click', () => {
-            searchBar.classList.toggle('active');
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!searchBar.contains(e.target) && e.target !== searchIcon) {
-                searchBar.classList.remove('active');
-            }
-        });
-
-        let searchTimeout;
-        searchInput.addEventListener('input', (e) => {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                const query = e.target.value.trim();
-                if (query.length >= 2) {
-                    fetch(`/api/search?q=${encodeURIComponent(query)}`)
-                        .then(res => res.json())
-                        .then(data => {
-                            // Update movie results
-                            movieResults.innerHTML = data.movies.length ? 
-                                data.movies.map(movie => `
-                                    <div class="search-result">
-                                        <a href="/movies/${movie.id}">${movie.title}</a>
-                                    </div>
-                                `).join('') : 
-                                '<p>No movies found</p>';
-
-                            // Update TV show results
-                            tvshowResults.innerHTML = data.tvshows.length ?
-                                data.tvshows.map(tvshow => `
-                                    <div class="search-result">
-                                        <a href="/tvshows/${tvshow.id}">${tvshow.title}</a>
-                                    </div>
-                                `).join('') :
-                                '<p>No TV shows found</p>';
-                        });
-                }
-            }, 300);
-        });
-    </script>
 </body>
 </html>

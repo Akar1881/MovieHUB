@@ -11,29 +11,33 @@
     <header class="header">
         <div class="container">
             <nav class="nav-menu">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon" id="headerSearchIcon"></i>
+                    <div class="search-bar" id="headerSearchBar">
+                        <input type="text" class="search-input" id="headerSearchInput" placeholder="Search movies and TV shows...">
+                        <div class="search-results" id="headerSearchResults">
+                            <div class="search-section">
+                                <h3>Movies</h3>
+                                <div id="headerMovieResults"></div>
+                            </div>
+                            <div class="search-section">
+                                <h3>TV Shows</h3>
+                                <div id="headerTvshowResults"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="logo">
                     <a href="/">
                         <img src="/images/logo.png" alt="<%= config.site.name %>">
                     </a>
                 </div>
-                <div class="search-container">
-                    <i class="fas fa-search search-icon" id="searchIcon"></i>
-                    <div class="search-bar" id="searchBar">
-                        <input type="text" class="search-input" id="searchInput" placeholder="Search movies and TV shows...">
-                        <div class="search-results" id="searchResults">
-                            <div class="search-section">
-                                <h3>Movies</h3>
-                                <div id="movieResults"></div>
-                            </div>
-                            <div class="search-section">
-                                <h3>TV Shows</h3>
-                                <div id="tvshowResults"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
                 <% if (user) { %>
-                    <span class="text-primary"><%= user.username %></span>
+                    <span class="user-info"><%= user.username %></span>
+                <% } else { %>
+                    <span class="user-info">
+                        <a href="/auth/login" style="color: var(--primary); text-decoration: none;">Login</a>
+                    </span>
                 <% } %>
             </nav>
         </div>
@@ -84,3 +88,55 @@
     </aside>
 
     <main class="main-content">
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const headerSearchIcon = document.getElementById('headerSearchIcon');
+        const headerSearchBar = document.getElementById('headerSearchBar');
+        const headerSearchInput = document.getElementById('headerSearchInput');
+        const headerMovieResults = document.getElementById('headerMovieResults');
+        const headerTvshowResults = document.getElementById('headerTvshowResults');
+
+        if (headerSearchIcon && headerSearchBar && headerSearchInput) {
+            headerSearchIcon.addEventListener('click', () => {
+                headerSearchBar.classList.toggle('active');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!headerSearchBar.contains(e.target) && e.target !== headerSearchIcon) {
+                    headerSearchBar.classList.remove('active');
+                }
+            });
+
+            let headerSearchTimeout;
+            headerSearchInput.addEventListener('input', (e) => {
+                clearTimeout(headerSearchTimeout);
+                headerSearchTimeout = setTimeout(() => {
+                    const query = e.target.value.trim();
+                    if (query.length >= 2) {
+                        fetch(`/api/search?q=${encodeURIComponent(query)}`)
+                            .then(res => res.json())
+                            .then(data => {
+                                // Update movie results
+                                headerMovieResults.innerHTML = data.movies.length ? 
+                                    data.movies.map(movie => `
+                                        <div class="search-result">
+                                            <a href="/movies/${movie.id}">${movie.title}</a>
+                                        </div>
+                                    `).join('') : 
+                                    '<p>No movies found</p>';
+
+                                // Update TV show results
+                                headerTvshowResults.innerHTML = data.tvshows.length ?
+                                    data.tvshows.map(tvshow => `
+                                        <div class="search-result">
+                                            <a href="/tvshows/${tvshow.id}">${tvshow.title}</a>
+                                        </div>
+                                    `).join('') :
+                                    '<p>No TV shows found</p>';
+                            });
+                    }
+                }, 300);
+            });
+        }
+    });
+    </script>

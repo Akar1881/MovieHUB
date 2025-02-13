@@ -3,17 +3,30 @@
 <div class="container">
     <h1>TV Shows</h1>
     
-    <div class="filter-controls">
-        <select id="sort-select" class="filter-select">
-            <option value="latest">Latest</option>
-            <option value="oldest">Oldest</option>
-            <option value="rating">Highest Rated</option>
-        </select>
+    <div class="page-search">
+        <input type="text" id="page-search-input" class="page-search-input" placeholder="Search TV shows...">
+        <div class="filter-controls">
+            <select id="sort-select" class="filter-select">
+                <option value="latest">Latest</option>
+                <option value="oldest">Oldest</option>
+                <option value="rating">Highest Rated</option>
+            </select>
+            <select id="seasons-select" class="filter-select">
+                <option value="all">All Seasons</option>
+                <option value="1">1 Season</option>
+                <option value="2">2 Seasons</option>
+                <option value="3+">3+ Seasons</option>
+            </select>
+        </div>
     </div>
 
     <div class="content-grid">
         <% tvshows.forEach(tvshow => { %>
-            <div class="content-card" data-rating="<%= tvshow.avgRating || 0 %>" data-date="<%= tvshow.created_at %>">
+            <div class="content-card" 
+                 data-rating="<%= tvshow.avgRating || 0 %>" 
+                 data-date="<%= tvshow.created_at %>"
+                 data-seasons="<%= tvshow.seasons %>"
+                 data-title="<%= tvshow.title.toLowerCase() %>">
                 <a href="/tvshows/<%= tvshow.id %>">
                     <img src="<%= tvshow.poster %>" alt="<%= tvshow.title %>">
                     <% if (tvshow.avgRating > 0) { %>
@@ -30,26 +43,53 @@
 </div>
 
 <script>
+const searchInput = document.getElementById('page-search-input');
 const sortSelect = document.getElementById('sort-select');
+const seasonsSelect = document.getElementById('seasons-select');
 const contentGrid = document.querySelector('.content-grid');
 
-function sortTVShows(criteria) {
+function filterAndSortContent() {
+    const searchTerm = searchInput.value.toLowerCase();
+    const sortBy = sortSelect.value;
+    const seasonsFilter = seasonsSelect.value;
+    
     const tvshows = Array.from(contentGrid.children);
     
-    tvshows.sort((a, b) => {
-        if (criteria === 'latest') {
+    tvshows.forEach(tvshow => {
+        const title = tvshow.dataset.title;
+        const seasons = parseInt(tvshow.dataset.seasons);
+        let showBySeasons = true;
+        
+        if (seasonsFilter !== 'all') {
+            if (seasonsFilter === '3+') {
+                showBySeasons = seasons >= 3;
+            } else {
+                showBySeasons = seasons === parseInt(seasonsFilter);
+            }
+        }
+        
+        const shouldShow = title.includes(searchTerm) && showBySeasons;
+        tvshow.style.display = shouldShow ? '' : 'none';
+    });
+    
+    const visibleShows = tvshows.filter(show => show.style.display !== 'none');
+    
+    visibleShows.sort((a, b) => {
+        if (sortBy === 'latest') {
             return new Date(b.dataset.date) - new Date(a.dataset.date);
-        } else if (criteria === 'oldest') {
+        } else if (sortBy === 'oldest') {
             return new Date(a.dataset.date) - new Date(b.dataset.date);
-        } else if (criteria === 'rating') {
+        } else if (sortBy === 'rating') {
             return parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating);
         }
     });
     
-    tvshows.forEach(tvshow => contentGrid.appendChild(tvshow));
+    visibleShows.forEach(show => contentGrid.appendChild(show));
 }
 
-sortSelect.addEventListener('change', (e) => sortTVShows(e.target.value));
+searchInput.addEventListener('input', filterAndSortContent);
+sortSelect.addEventListener('change', filterAndSortContent);
+seasonsSelect.addEventListener('change', filterAndSortContent);
 </script>
 
 <%- include('../partials/footer') %>

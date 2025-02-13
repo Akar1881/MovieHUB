@@ -3,17 +3,29 @@
 <div class="container">
     <h1>Movies</h1>
     
-    <div class="filter-controls">
-        <select id="sort-select" class="filter-select">
-            <option value="latest">Latest</option>
-            <option value="oldest">Oldest</option>
-            <option value="rating">Highest Rated</option>
-        </select>
+    <div class="page-search">
+        <input type="text" id="page-search-input" class="page-search-input" placeholder="Search movies...">
+        <div class="filter-controls">
+            <select id="sort-select" class="filter-select">
+                <option value="latest">Latest</option>
+                <option value="oldest">Oldest</option>
+                <option value="rating">Highest Rated</option>
+            </select>
+            <select id="type-select" class="filter-select">
+                <option value="all">All Types</option>
+                <option value="movie">Movies</option>
+                <option value="anime">Anime Movies</option>
+            </select>
+        </div>
     </div>
 
     <div class="content-grid">
         <% movies.forEach(movie => { %>
-            <div class="content-card" data-rating="<%= movie.avgRating || 0 %>" data-date="<%= movie.created_at %>">
+            <div class="content-card" 
+                 data-rating="<%= movie.avgRating || 0 %>" 
+                 data-date="<%= movie.created_at %>"
+                 data-type="<%= movie.type %>"
+                 data-title="<%= movie.title.toLowerCase() %>">
                 <a href="/movies/<%= movie.id %>">
                     <img src="<%= movie.poster %>" alt="<%= movie.title %>">
                     <% if (movie.avgRating > 0) { %>
@@ -30,26 +42,46 @@
 </div>
 
 <script>
+const searchInput = document.getElementById('page-search-input');
 const sortSelect = document.getElementById('sort-select');
+const typeSelect = document.getElementById('type-select');
 const contentGrid = document.querySelector('.content-grid');
 
-function sortMovies(criteria) {
+function filterAndSortContent() {
+    const searchTerm = searchInput.value.toLowerCase();
+    const sortBy = sortSelect.value;
+    const typeFilter = typeSelect.value;
+    
     const movies = Array.from(contentGrid.children);
     
-    movies.sort((a, b) => {
-        if (criteria === 'latest') {
+    movies.forEach(movie => {
+        const title = movie.dataset.title;
+        const type = movie.dataset.type;
+        const shouldShow = 
+            title.includes(searchTerm) && 
+            (typeFilter === 'all' || type === typeFilter);
+        
+        movie.style.display = shouldShow ? '' : 'none';
+    });
+    
+    const visibleMovies = movies.filter(movie => movie.style.display !== 'none');
+    
+    visibleMovies.sort((a, b) => {
+        if (sortBy === 'latest') {
             return new Date(b.dataset.date) - new Date(a.dataset.date);
-        } else if (criteria === 'oldest') {
+        } else if (sortBy === 'oldest') {
             return new Date(a.dataset.date) - new Date(b.dataset.date);
-        } else if (criteria === 'rating') {
+        } else if (sortBy === 'rating') {
             return parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating);
         }
     });
     
-    movies.forEach(movie => contentGrid.appendChild(movie));
+    visibleMovies.forEach(movie => contentGrid.appendChild(movie));
 }
 
-sortSelect.addEventListener('change', (e) => sortMovies(e.target.value));
+searchInput.addEventListener('input', filterAndSortContent);
+sortSelect.addEventListener('change', filterAndSortContent);
+typeSelect.addEventListener('change', filterAndSortContent);
 </script>
 
 <%- include('../partials/footer') %>
