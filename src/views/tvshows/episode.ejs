@@ -1,0 +1,21 @@
+<%- include('../partials/header') %>
+
+<div class="container">
+    <div class="episode-details">
+        <h1>Season <%= episode.season %> Episode <%= episode.episode %></h1>
+        
+        <div class="episode-servers">
+            <h3>Watch Online</h3>
+            <% servers.forEach(server => { %>
+                <div class="server-option">
+                    <h4><%= server.server_name %></h4>
+                    <div class="embed-container">
+                        <iframe src="<%= server.embed_url %>" allowfullscreen></iframe>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

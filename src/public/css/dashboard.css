@@ -1,0 +1,117 @@
+/* Admin Dashboard Styles */
+.admin-grid {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 2rem;
+  min-height: calc(100vh - 60px);
+}
+
+.admin-sidebar {
+  background-color: var(--secondary);
+  padding: 2rem;
+  border-radius: 8px;
+  height: fit-content;
+}
+
+.admin-sidebar h3 {
+  color: var(--primary);
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.admin-sidebar ul {
+  list-style: none;
+}
+
+.admin-sidebar li {
+  margin-bottom: 1rem;
+}
+
+.admin-sidebar .btn {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: rgba(255, 215, 0, 0.1);
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: 4px;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.admin-sidebar .btn:hover {
+  background-color: var(--primary);
+  color: var(--secondary);
+}
+
+.admin-content {
+  padding: 2rem;
+  background-color: var(--secondary);
+  border-radius: 8px;
+}
+
+.admin-content h2 {
+  color: var(--primary);
+  margin-bottom: 2rem;
+  font-size: 1.8rem;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 2rem;
+}
+
+.content-card {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.content-card:hover {
+  transform: translateY(-5px);
+}
+
+.content-card img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.content-actions {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+  display: flex;
+  gap: 0.5rem;
+}
+
+.content-actions .btn {
+  flex: 1;
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  text-align: center;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-danger {
+  background-color: #dc2626;
+  color: white;
+  border: none;
+}
+
+.btn-danger:hover {
+  background-color: #b91c1c;
+}
+
+.inline {
+  display: inline;
+}

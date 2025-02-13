@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= config.site.name %></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav class="nav-menu">
+                <div class="logo">
+                    <a href="/">
+                        <img src="<%= config.site.logo %>" alt="<%= config.site.name %>">
+                    </a>
+                </div>
+                <div class="search-container">
+                    <i class="fas fa-search search-icon" id="searchIcon"></i>
+                    <div class="search-bar" id="searchBar">
+                        <input type="text" class="search-input" id="searchInput" placeholder="Search movies and TV shows...">
+                        <div class="search-results" id="searchResults">
+                            <div class="search-section">
+                                <h3>Movies</h3>
+                                <div id="movieResults"></div>
+                            </div>
+                            <div class="search-section">
+                                <h3>TV Shows</h3>
+                                <div id="tvshowResults"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% if (user) { %>
+                    <span class="text-primary"><%= user.username %></span>
+                <% } %>
+            </nav>
+        </div>
+    </header>
+
+    <aside class="sidebar">
+        <nav class="sidebar-nav">
+            <a href="/" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="/movies" class="nav-item">
+                <i class="fas fa-film"></i>
+                <span>Movies</span>
+            </a>
+            <a href="/tvshows" class="nav-item">
+                <i class="fas fa-tv"></i>
+                <span>TV Shows</span>
+            </a>
+            <% if (user) { %>
+                <% if (user.is_admin) { %>
+                    <a href="/admin" class="nav-item">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Admin</span>
+                    </a>
+                <% } %>
+                <a href="/user/profile" class="nav-item">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+                <a href="/auth/logout" class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            <% } else { %>
+                <a href="/auth/login" class="nav-item">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Login</span>
+                </a>
+                <a href="/auth/register" class="nav-item">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Register</span>
+                </a>
+            <% } %>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+</main>

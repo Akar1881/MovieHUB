@@ -1,0 +1,45 @@
+<%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/profile.css">
+
+<div class="container">
+  <div class="profile-container">
+    <h2>Profile</h2>
+    <% if (locals.error) { %>
+      <div class="alert alert-error"><%= error %></div>
+    <% } %>
+    
+    <div class="profile-info">
+      <form action="/user/profile" method="POST">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" value="<%= user.username %>" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" value="<%= user.email %>" required>
+        </div>
+        <button type="submit" class="btn">Update Profile</button>
+      </form>
+    </div>
+
+    <div class="user-reviews">
+      <h3>Your Reviews</h3>
+      <% if (reviews.length > 0) { %>
+        <div class="reviews-grid">
+          <% reviews.forEach(review => { %>
+            <div class="review-card">
+              <h4><%= review.content_type === 'movie' ? 'Movie' : 'TV Show' %>: <%= review.title %></h4>
+              <div class="rating">Rating: <%= review.rating %>/5</div>
+              <p><%= review.comment %></p>
+              <small>Posted on <%= new Date(review.created_at).toLocaleDateString() %></small>
+            </div>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <p>You haven't written any reviews yet.</p>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

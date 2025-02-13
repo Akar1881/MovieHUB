@@ -1,0 +1,25 @@
+{
+  "site": {
+    "name": "MovieHub",
+    "description": "Watch your favorite movies and TV shows",
+    "logo": "/images/logo.png"
+  },
+  "theme": {
+    "primary": "#FFD700",
+    "background": "#1A1A1A",
+    "text": "#FFFFFF",
+    "secondary": "#333333"
+  },
+  "admin": {
+    "email": "admin@example.com",
+    "password": "admin123",
+    "username": "admin"
+  },
+  "upload": {
+    "poster": {
+      "width": 1200,
+      "height": 1809
+    },
+    "allowedTypes": ["image/jpeg", "image/png"]
+  }
+}

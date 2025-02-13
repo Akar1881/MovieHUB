@@ -1,0 +1,50 @@
+<%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/dashboard.css">
+
+<div class="admin-grid">
+  <aside class="admin-sidebar">
+    <h3>Admin Menu</h3>
+    <ul>
+      <li><a href="/admin/movies/add" class="btn">Add Movie</a></li>
+      <li><a href="/admin/tvshows/add" class="btn">Add TV Show</a></li>
+    </ul>
+  </aside>
+  
+  <main class="admin-content">
+    <section class="admin-movies">
+      <h2>Movies</h2>
+      <div class="content-grid">
+        <% movies.forEach(movie => { %>
+          <div class="content-card">
+            <img src="<%= movie.poster %>" alt="<%= movie.title %>">
+            <div class="content-actions">
+              <a href="/admin/movies/edit/<%= movie.id %>" class="btn">Edit</a>
+              <form action="/admin/movies/delete/<%= movie.id %>" method="POST" class="inline">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+              </form>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    </section>
+    
+    <section class="admin-tvshows">
+      <h2>TV Shows</h2>
+      <div class="content-grid">
+        <% tvshows.forEach(tvshow => { %>
+          <div class="content-card">
+            <img src="<%= tvshow.poster %>" alt="<%= tvshow.title %>">
+            <div class="content-actions">
+              <a href="/admin/tvshows/edit/<%= tvshow.id %>" class="btn">Edit</a>
+              <form action="/admin/tvshows/delete/<%= tvshow.id %>" method="POST" class="inline">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+              </form>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    </section>
+  </main>
+</div>
+
+<%- include('../partials/footer') %>

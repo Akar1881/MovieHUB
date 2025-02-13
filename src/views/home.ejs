@@ -1,0 +1,47 @@
+<%- include('partials/header') %>
+<link rel="stylesheet" href="/css/home.css">
+
+<section class="hero">
+  <div class="container">
+    <h1>Welcome to <%= config.site.name %></h1>
+    <p><%= config.site.description %></p>
+  </div>
+</section>
+
+<section class="latest-movies">
+  <div class="container">
+    <h2>Latest Movies</h2>
+    <div class="content-grid">
+      <% movies.forEach(movie => { %>
+        <div class="content-card">
+          <a href="/movies/<%= movie.id %>">
+            <img src="<%= movie.poster %>" alt="<%= movie.title %>">
+            <div class="content-info">
+              <h3><%= movie.title %></h3>
+            </div>
+          </a>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</section>
+
+<section class="latest-tvshows">
+  <div class="container">
+    <h2>Latest TV Shows</h2>
+    <div class="content-grid">
+      <% tvshows.forEach(tvshow => { %>
+        <div class="content-card">
+          <a href="/tvshows/<%= tvshow.id %>">
+            <img src="<%= tvshow.poster %>" alt="<%= tvshow.title %>">
+            <div class="content-info">
+              <h3><%= tvshow.title %></h3>
+            </div>
+          </a>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
