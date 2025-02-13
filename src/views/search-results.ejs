@@ -1,0 +1,51 @@
+<%- include('partials/header') %>
+
+<div class="container search-results-page">
+  <h1>Search Results for "<%= query %>"</h1>
+  
+  <% if (movies.length === 0 && tvshows.length === 0) { %>
+    <div class="no-results">
+      <p>No results found for your search.</p>
+    </div>
+  <% } %>
+
+  <% if (movies.length > 0) { %>
+    <section class="search-section">
+      <h2>Movies</h2>
+      <div class="content-grid">
+        <% movies.forEach(movie => { %>
+          <div class="content-card">
+            <a href="/movies/<%= movie.id %>">
+              <img src="<%= movie.poster %>" alt="<%= movie.title %>">
+              <div class="content-info">
+                <h3><%= movie.title %></h3>
+                <span class="content-type"><%= movie.type %></span>
+              </div>
+            </a>
+          </div>
+        <% }); %>
+      </div>
+    </section>
+  <% } %>
+
+  <% if (tvshows.length > 0) { %>
+    <section class="search-section">
+      <h2>TV Shows</h2>
+      <div class="content-grid">
+        <% tvshows.forEach(tvshow => { %>
+          <div class="content-card">
+            <a href="/tvshows/<%= tvshow.id %>">
+              <img src="<%= tvshow.poster %>" alt="<%= tvshow.title %>">
+              <div class="content-info">
+                <h3><%= tvshow.title %></h3>
+                <span class="content-type">TV Show</span>
+              </div>
+            </a>
+          </div>
+        <% }); %>
+      </div>
+    </section>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

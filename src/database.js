@@ -10,6 +10,12 @@ if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
 }
 
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'public/uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 const dbPath = path.join(dbDir, 'movies.db');
 const db = new sqlite3.Database(dbPath);
 
@@ -100,6 +106,16 @@ function initDatabase() {
     });
   });
 }
+
+// Add getTVShowEpisodes function
+const getTVShowEpisodes = (tvshowId) => {
+  return new Promise((resolve, reject) => {
+    db.all('SELECT * FROM tvshow_episodes WHERE tvshow_id = ? ORDER BY season, episode', [tvshowId], (err, rows) => {
+      if (err) reject(err);
+      resolve(rows);
+    });
+  });
+};
 
 // Database operations
 const db_ops = {
@@ -336,11 +352,13 @@ const db_ops = {
     });
   },
 
+  getTVShowEpisodes,
+
   // Search functions
   searchMovies: (query) => {
     return new Promise((resolve, reject) => {
       const searchTerm = `%${query}%`;
-      db.all('SELECT id, title FROM movies WHERE title LIKE ? ORDER BY title ASC LIMIT 5',
+      db.all('SELECT * FROM movies WHERE title LIKE ? ORDER BY title ASC',
         [searchTerm], (err, rows) => {
           if (err) reject(err);
           resolve(rows);
@@ -351,7 +369,7 @@ const db_ops = {
   searchTVShows: (query) => {
     return new Promise((resolve, reject) => {
       const searchTerm = `%${query}%`;
-      db.all('SELECT id, title FROM tvshows WHERE title LIKE ? ORDER BY title ASC LIMIT 5',
+      db.all('SELECT * FROM tvshows WHERE title LIKE ? ORDER BY title ASC',
         [searchTerm], (err, rows) => {
           if (err) reject(err);
           resolve(rows);

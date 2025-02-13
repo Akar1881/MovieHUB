@@ -15,7 +15,11 @@ router.get('/search', async (req, res) => {
             db.searchTVShows(query)
         ]);
 
-        res.json({ movies, tvshows });
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            res.json({ movies, tvshows });
+        } else {
+            res.render('search-results', { movies, tvshows, query });
+        }
     } catch (err) {
         res.status(500).json({ error: 'Search failed' });
     }

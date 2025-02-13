@@ -1,4 +1,5 @@
 <%- include('../partials/header') %>
+<link rel="stylesheet" href="/css/tvshows.css">
 
 <div class="container">
     <div class="episode-details">
@@ -6,8 +7,17 @@
         
         <div class="episode-servers">
             <h3>Watch Online</h3>
-            <% servers.forEach(server => { %>
-                <div class="server-option">
+            <div class="server-selector">
+                <label for="server-select">Select a server to watch:</label>
+                <select id="server-select" class="server-select">
+                    <option value="">Choose a server</option>
+                    <% servers.forEach((server, index) => { %>
+                        <option value="<%= index %>"><%= server.server_name %></option>
+                    <% }); %>
+                </select>
+            </div>
+            <% servers.forEach((server, index) => { %>
+                <div class="server-option" id="server-<%= index %>" style="display: none;">
                     <h4><%= server.server_name %></h4>
                     <div class="embed-container">
                         <iframe src="<%= server.embed_url %>" allowfullscreen></iframe>
@@ -17,5 +27,18 @@
         </div>
     </div>
 </div>
+
+<script>
+document.getElementById('server-select').addEventListener('change', function() {
+    // Hide all server options
+    document.querySelectorAll('.server-option').forEach(el => el.style.display = 'none');
+    
+    // Show selected server
+    const selectedServer = this.value;
+    if (selectedServer !== '') {
+        document.getElementById('server-' + selectedServer).style.display = 'block';
+    }
+});
+</script>
 
 <%- include('../partials/footer') %>
