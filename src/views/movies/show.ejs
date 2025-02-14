@@ -9,6 +9,13 @@
         <div class="movie-info">
             <h1><%= movie.title %></h1>
             
+            <% if (user) { %>
+                <button id="favoriteBtn" class="favorite-btn" onclick="toggleFavorite()">
+                    <i class="fas <%= isFavorite ? 'fa-heart' : 'fa-heart-o' %>"></i>
+                    <span><%= isFavorite ? 'Remove from Favorites' : 'Add to Favorites' %></span>
+                </button>
+            <% } %>
+            
             <div class="rating-display">
                 <% const avgRating = reviews.reduce((acc, rev) => acc + rev.rating, 0) / reviews.length || 0; %>
                 <div class="rating-stars">
@@ -282,6 +289,29 @@
     border-radius: 4px;
     font-size: 0.9rem;
 }
+
+.favorite-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: rgba(255, 215, 0, 0.1);
+    border: 1px solid var(--primary);
+    border-radius: 4px;
+    color: var(--primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 1rem 0;
+}
+
+.favorite-btn:hover {
+    background-color: var(--primary);
+    color: var(--secondary);
+}
+
+.favorite-btn i {
+    font-size: 1.1rem;
+}
 </style>
 
 <script>
@@ -315,6 +345,34 @@ async function deleteReview(reviewId) {
     } catch (err) {
         console.error('Error deleting review:', err);
         alert('Failed to delete review');
+    }
+}
+
+async function toggleFavorite() {
+    const button = document.getElementById('favoriteBtn');
+    const icon = button.querySelector('i');
+    const text = button.querySelector('span');
+    const isFavorite = icon.classList.contains('fa-heart');
+    
+    try {
+        const response = await fetch(`/user/favorites/${isFavorite ? 'remove' : 'add'}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                contentId: <%= movie.id %>,
+                contentType: 'movie'
+            })
+        });
+        
+        if (response.ok) {
+            icon.classList.toggle('fa-heart');
+            icon.classList.toggle('fa-heart-o');
+            text.textContent = isFavorite ? 'Add to Favorites' : 'Remove from Favorites';
+        }
+    } catch (err) {
+        console.error('Failed to toggle favorite:', err);
     }
 }
 </script>
