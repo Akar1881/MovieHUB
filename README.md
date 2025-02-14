@@ -15,6 +15,7 @@ MovieHUB is a powerful and feature-rich movie and TV show streaming platform bui
 - 🎨 Beautiful and responsive UI
 - 🛡️ Admin panel for content management
 - 📱 Mobile-friendly design
+- 👥 Credits system for technicians, designers, and translators
 
 ## Tech Stack 🛠️
 
@@ -134,6 +135,12 @@ moviehub/
    - Save favorites
    - Manage profile
 
+4. **Credits Information**
+   - View technicians who worked on the content
+   - See poster designers' credits
+   - Check translators who provided subtitles
+   - Scrollable credits list for large teams
+
 ### For Admins 👑
 
 1. **Content Management**
@@ -142,7 +149,13 @@ moviehub/
    - Upload posters
    - Organize content by genre
 
-2. **User Management**
+2. **Credits Management**
+   - Add/edit technicians for each content
+   - Manage poster designers' credits
+   - Update translators' information
+   - Easy-to-use interface for managing credits
+
+3. **User Management**
    - View user list
    - Manage user roles
    - Remove inappropriate reviews
@@ -156,7 +169,7 @@ moviehub/
 ![Movie Details](screenshots/moviepage.jpg)
 
 ### TV Show Page
-![TV Show Page](screenshots/tvshow.jpg)
+![TV Show Page](screenshots/tvshows.jpg)
 
 ### Admin Dashboard
 ![Admin Dashboard](screenshots/admin.jpg)

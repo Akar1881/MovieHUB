@@ -14,6 +14,7 @@ router.get('/:id', async (req, res) => {
     const movie = await db.getMovieById(req.params.id);
     const servers = await db.getMovieServers(req.params.id);
     const reviews = await db.getMovieReviews(req.params.id);
+    const credits = await db.getCredits(req.params.id, 'movie');
     let isFavorite = false;
     let hasReviewed = false;
 
@@ -24,7 +25,7 @@ router.get('/:id', async (req, res) => {
       ]);
     }
 
-    res.render('movies/show', { movie, servers, reviews, isFavorite, hasReviewed });
+    res.render('movies/show', { movie, servers, reviews, credits, isFavorite, hasReviewed });
   } catch (err) {
     console.error('Movie details error:', err);
     res.redirect('/movies');

@@ -14,6 +14,7 @@ router.get('/:id', async (req, res) => {
     const tvshow = await db.getTVShowById(req.params.id);
     const episodes = await db.getTVShowEpisodes(req.params.id);
     const reviews = await db.getTVShowReviews(req.params.id);
+    const credits = await db.getCredits(req.params.id, 'tvshow');
     let isFavorite = false;
     let hasReviewed = false;
 
@@ -24,7 +25,7 @@ router.get('/:id', async (req, res) => {
       ]);
     }
 
-    res.render('tvshows/show', { tvshow, episodes, reviews, isFavorite, hasReviewed });
+    res.render('tvshows/show', { tvshow, episodes, reviews, credits, isFavorite, hasReviewed });
   } catch (err) {
     console.error('TV show details error:', err);
     res.redirect('/tvshows');

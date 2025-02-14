@@ -111,6 +111,16 @@ const db_ops = {
           FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
         )`);
 
+        // Credits Table
+        db.run(`CREATE TABLE IF NOT EXISTS credits (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          content_id INTEGER NOT NULL,
+          content_type TEXT NOT NULL,
+          role TEXT NOT NULL,
+          name TEXT NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+
         // Create admin account if it doesn't exist
         const { email, password, username } = config.admin;
         db.get('SELECT id FROM users WHERE email = ?', [email], (err, row) => {
@@ -646,16 +656,61 @@ const db_ops = {
           resolve(!!row);
         });
     });
+  },
+
+  deleteReview: (reviewId) => {
+    return new Promise((resolve, reject) => {
+      db.run('DELETE FROM reviews WHERE id = ?', [reviewId], (err) => {
+        if (err) reject(err);
+        resolve();
+      });
+    });
+  },
+
+  // Credits operations
+  addCredit: (contentId, contentType, role, name) => {
+    return new Promise((resolve, reject) => {
+      db.run(`
+        INSERT INTO credits (content_id, content_type, role, name)
+        VALUES (?, ?, ?, ?)`,
+        [contentId, contentType, role, name],
+        (err) => {
+          if (err) reject(err);
+          resolve();
+        }
+      );
+    });
+  },
+
+  getCredits: (contentId, contentType) => {
+    return new Promise((resolve, reject) => {
+      db.all(`
+        SELECT id, role, name
+        FROM credits
+        WHERE content_id = ? AND content_type = ?
+        ORDER BY role, id`,
+        [contentId, contentType],
+        (err, rows) => {
+          if (err) reject(err);
+          resolve(rows);
+        }
+      );
+    });
+  },
+
+  deleteCredits: (contentId, contentType) => {
+    return new Promise((resolve, reject) => {
+      db.run(`
+        DELETE FROM credits
+        WHERE content_id = ? AND content_type = ?`,
+        [contentId, contentType],
+        (err) => {
+          if (err) reject(err);
+          resolve();
+        }
+      );
+    });
   }
 };
-
-deleteReview: (reviewId) => {
-  return new Promise((resolve, reject) => {
-    db.run('DELETE FROM reviews WHERE id = ?', [reviewId], (err) => {
-      if (err) reject(err);
-      resolve();
-    });
-  });
-},
 
 module.exports = db_ops;

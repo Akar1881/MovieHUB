@@ -68,7 +68,8 @@ router.post('/movies/add', isAdmin, upload.single('poster'), async (req, res) =>
       language, 
       releaseDate, 
       runtime, 
-      servers 
+      servers,
+      credits 
     } = req.body;
 
     if (!req.file) {
@@ -98,6 +99,19 @@ router.post('/movies/add', isAdmin, upload.single('poster'), async (req, res) =>
         }
       }
     }
+
+    // Handle credits
+    if (credits && typeof credits === 'object') {
+      for (const role in credits) {
+        if (Array.isArray(credits[role])) {
+          for (const name of credits[role]) {
+            if (name.trim()) {
+              await db.addCredit(movieId, 'movie', role, name.trim());
+            }
+          }
+        }
+      }
+    }
     
     res.redirect('/admin');
   } catch (err) {
@@ -114,7 +128,9 @@ router.get('/movies/edit/:id', isAdmin, async (req, res) => {
       return res.redirect('/admin');
     }
     const servers = await db.getMovieServers(req.params.id);
+    const credits = await db.getCredits(req.params.id, 'movie');
     movie.servers = servers;
+    movie.credits = credits;
     res.render('admin/edit-movie', { movie });
   } catch (err) {
     console.error('Edit movie form error:', err);
@@ -138,7 +154,8 @@ router.post('/movies/edit/:id', isAdmin, upload.single('poster'), async (req, re
       language, 
       releaseDate, 
       runtime, 
-      servers 
+      servers,
+      credits 
     } = req.body;
 
     const updateData = { 
@@ -153,7 +170,6 @@ router.post('/movies/edit/:id', isAdmin, upload.single('poster'), async (req, re
     
     if (req.file) {
       updateData.poster = '/uploads/' + req.file.filename;
-      // Delete old poster
       if (movie.poster) {
         const oldPosterPath = path.join(__dirname, '../public', movie.poster);
         fs.unlink(oldPosterPath, (err) => {
@@ -176,13 +192,29 @@ router.post('/movies/edit/:id', isAdmin, upload.single('poster'), async (req, re
         }
       }
     }
+
+    // Update credits
+    await db.deleteCredits(req.params.id, 'movie');
+    if (credits && typeof credits === 'object') {
+      for (const role in credits) {
+        if (Array.isArray(credits[role])) {
+          for (const name of credits[role]) {
+            if (name.trim()) {
+              await db.addCredit(req.params.id, 'movie', role, name.trim());
+            }
+          }
+        }
+      }
+    }
     
     res.redirect('/admin');
   } catch (err) {
     console.error('Update movie error:', err);
     const movie = await db.getMovieById(req.params.id);
     const servers = await db.getMovieServers(req.params.id);
+    const credits = await db.getCredits(req.params.id, 'movie');
     movie.servers = servers;
+    movie.credits = credits;
     res.render('admin/edit-movie', { movie, error: 'Failed to update movie: ' + err.message });
   }
 });
@@ -224,7 +256,8 @@ router.post('/tvshows/add', isAdmin, upload.single('poster'), async (req, res) =
       runtime,
       seasons, 
       totalEpisodes,
-      episodes 
+      episodes,
+      credits 
     } = req.body;
     
     if (!req.file) {
@@ -264,6 +297,19 @@ router.post('/tvshows/add', isAdmin, upload.single('poster'), async (req, res) =
         }
       }
     }
+
+    // Handle credits
+    if (credits && typeof credits === 'object') {
+      for (const role in credits) {
+        if (Array.isArray(credits[role])) {
+          for (const name of credits[role]) {
+            if (name.trim()) {
+              await db.addCredit(tvshowId, 'tvshow', role, name.trim());
+            }
+          }
+        }
+      }
+    }
     
     res.redirect('/admin');
   } catch (err) {
@@ -280,12 +326,14 @@ router.get('/tvshows/edit/:id', isAdmin, async (req, res) => {
       return res.redirect('/admin');
     }
     const episodes = await db.getTVShowEpisodes(req.params.id);
+    const credits = await db.getCredits(req.params.id, 'tvshow');
     
     // Get servers for each episode
     for (const episode of episodes) {
       episode.servers = await db.getEpisodeServers(episode.id);
     }
     
+    tvshow.credits = credits;
     res.render('admin/edit-tvshow', { tvshow, episodes });
   } catch (err) {
     console.error('Edit TV show form error:', err);
@@ -310,7 +358,8 @@ router.post('/tvshows/edit/:id', isAdmin, upload.single('poster'), async (req, r
       runtime,
       seasons,
       totalEpisodes,
-      episodes 
+      episodes,
+      credits 
     } = req.body;
 
     const updateData = { 
@@ -326,7 +375,6 @@ router.post('/tvshows/edit/:id', isAdmin, upload.single('poster'), async (req, r
     
     if (req.file) {
       updateData.poster = '/uploads/' + req.file.filename;
-      // Delete old poster
       if (tvshow.poster) {
         const oldPosterPath = path.join(__dirname, '../public', tvshow.poster);
         fs.unlink(oldPosterPath, (err) => {
@@ -353,12 +401,25 @@ router.post('/tvshows/edit/:id', isAdmin, upload.single('poster'), async (req, r
           episodeId = await db.addTVShowEpisode(req.params.id, episode.season, episode.number);
         }
         
-        // Add servers for the episode
         if (episode.servers && typeof episode.servers === 'object') {
           const serverEntries = Object.entries(episode.servers);
           for (const [serverIndex, server] of serverEntries) {
             if (server.name && server.url) {
               await db.addEpisodeServer(episodeId, server.name, server.url);
+            }
+          }
+        }
+      }
+    }
+
+    // Update credits
+    await db.deleteCredits(req.params.id, 'tvshow');
+    if (credits && typeof credits === 'object') {
+      for (const role in credits) {
+        if (Array.isArray(credits[role])) {
+          for (const name of credits[role]) {
+            if (name.trim()) {
+              await db.addCredit(req.params.id, 'tvshow', role, name.trim());
             }
           }
         }
@@ -371,9 +432,11 @@ router.post('/tvshows/edit/:id', isAdmin, upload.single('poster'), async (req, r
     try {
       const tvshow = await db.getTVShowById(req.params.id);
       const episodes = await db.getTVShowEpisodes(req.params.id);
+      const credits = await db.getCredits(req.params.id, 'tvshow');
       for (const episode of episodes) {
         episode.servers = await db.getEpisodeServers(episode.id);
       }
+      tvshow.credits = credits;
       res.render('admin/edit-tvshow', { 
         tvshow, 
         episodes, 
