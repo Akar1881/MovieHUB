@@ -9,12 +9,14 @@
         <div class="content-card">
           <a href="/movies/<%= movie.id %>">
             <img src="<%= movie.poster %>" alt="<%= movie.title %>">
-            <% if (movie.avgRating > 0) { %>
-              <div class="rating-badge">
-                <i class="fas fa-star"></i>
-                <%= movie.avgRating.toFixed(1) %>
-              </div>
-            <% } %>
+            <div class="rating-badge">
+              <i class="fas fa-star"></i>
+              <%= movie.avgRating ? movie.avgRating.toFixed(1) : '0.0' %>
+            </div>
+            <div class="watch-badge">
+              <i class="fas fa-eye"></i>
+              <%= formatCount(movie.watchCount || 0) %>
+            </div>
             <div class="content-title"><%= movie.title %></div>
           </a>
         </div>
@@ -29,12 +31,14 @@
         <div class="content-card">
           <a href="/tvshows/<%= tvshow.id %>">
             <img src="<%= tvshow.poster %>" alt="<%= tvshow.title %>">
-            <% if (tvshow.avgRating > 0) { %>
-              <div class="rating-badge">
-                <i class="fas fa-star"></i>
-                <%= tvshow.avgRating.toFixed(1) %>
-              </div>
-            <% } %>
+            <div class="rating-badge">
+              <i class="fas fa-star"></i>
+              <%= tvshow.avgRating ? tvshow.avgRating.toFixed(1) : '0.0' %>
+            </div>
+            <div class="watch-badge">
+              <i class="fas fa-eye"></i>
+              <%= formatCount(tvshow.watchCount || 0) %>
+            </div>
             <div class="content-title"><%= tvshow.title %></div>
           </a>
         </div>
@@ -49,12 +53,14 @@
         <div class="content-card">
           <a href="/movies/<%= movie.id %>">
             <img src="<%= movie.poster %>" alt="<%= movie.title %>">
-            <% if (movie.avgRating > 0) { %>
-              <div class="rating-badge">
-                <i class="fas fa-star"></i>
-                <%= movie.avgRating.toFixed(1) %>
-              </div>
-            <% } %>
+            <div class="rating-badge">
+              <i class="fas fa-star"></i>
+              <%= movie.avgRating ? movie.avgRating.toFixed(1) : '0.0' %>
+            </div>
+            <div class="watch-badge">
+              <i class="fas fa-eye"></i>
+              <%= formatCount(movie.watchCount || 0) %>
+            </div>
             <div class="content-title"><%= movie.title %></div>
           </a>
         </div>
@@ -63,24 +69,73 @@
   </section>
 
   <section class="movie-section">
-    <h2>Oldest Movies</h2>
+    <h2>Top Rated TV Shows</h2>
     <div class="horizontal-scroll">
-      <% movies.sort((a, b) => new Date(a.created_at) - new Date(b.created_at)).slice(0, 10).forEach(movie => { %>
+      <% tvshows.sort((a, b) => b.avgRating - a.avgRating).slice(0, 10).forEach(tvshow => { %>
         <div class="content-card">
-          <a href="/movies/<%= movie.id %>">
-            <img src="<%= movie.poster %>" alt="<%= movie.title %>">
-            <% if (movie.avgRating > 0) { %>
-              <div class="rating-badge">
-                <i class="fas fa-star"></i>
-                <%= movie.avgRating.toFixed(1) %>
-              </div>
-            <% } %>
-            <div class="content-title"><%= movie.title %></div>
+          <a href="/tvshows/<%= tvshow.id %>">
+            <img src="<%= tvshow.poster %>" alt="<%= tvshow.title %>">
+            <div class="rating-badge">
+              <i class="fas fa-star"></i>
+              <%= tvshow.avgRating ? tvshow.avgRating.toFixed(1) : '0.0' %>
+            </div>
+            <div class="watch-badge">
+              <i class="fas fa-eye"></i>
+              <%= formatCount(tvshow.watchCount || 0) %>
+            </div>
+            <div class="content-title"><%= tvshow.title %></div>
+          </a>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+
+  <section class="movie-section">
+    <h2>Most Viewed Content</h2>
+    <div class="horizontal-scroll">
+      <% const allContent = [...movies, ...tvshows]
+           .sort((a, b) => (b.watchCount || 0) - (a.watchCount || 0))
+           .slice(0, 10); %>
+      <% allContent.forEach(content => { %>
+        <div class="content-card">
+          <a href="/<%= content.type ? 'movies' : 'tvshows' %>/<%= content.id %>">
+            <img src="<%= content.poster %>" alt="<%= content.title %>">
+            <div class="rating-badge">
+              <i class="fas fa-star"></i>
+              <%= content.avgRating ? content.avgRating.toFixed(1) : '0.0' %>
+            </div>
+            <div class="watch-badge">
+              <i class="fas fa-eye"></i>
+              <%= formatCount(content.watchCount || 0) %>
+            </div>
+            <div class="content-title"><%= content.title %></div>
           </a>
         </div>
       <% }); %>
     </div>
   </section>
 </div>
+
+<style>
+.watch-badge {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  background: rgba(0, 0, 0, 0.8);
+  color: var(--primary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 60px;
+  justify-content: center;
+}
+
+.watch-badge i {
+  font-size: 0.875rem;
+}
+</style>
 
 <%- include('partials/footer') %>

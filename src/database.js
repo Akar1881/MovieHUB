@@ -111,6 +111,17 @@ const db_ops = {
           FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
         )`);
 
+        // Create watch counts table
+db.run(`CREATE TABLE IF NOT EXISTS watch_counts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  content_id INTEGER NOT NULL,
+  content_type TEXT NOT NULL,
+  user_id INTEGER,
+  ip_address TEXT,
+  watched_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET NULL
+)`);
+
         // Credits Table
         db.run(`CREATE TABLE IF NOT EXISTS credits (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -713,4 +724,88 @@ const db_ops = {
   }
 };
 
-module.exports = db_ops;
+const watchCountOperations = {
+  // Add watch count
+  addWatchCount: (contentId, contentType, userId = null, ipAddress = null) => {
+    return new Promise((resolve, reject) => {
+      // Check if this IP or user has already watched this content
+      const query = userId ? 
+        'SELECT id FROM watch_counts WHERE content_id = ? AND content_type = ? AND user_id = ?' :
+        'SELECT id FROM watch_counts WHERE content_id = ? AND content_type = ? AND ip_address = ?';
+      
+      const params = userId ? [contentId, contentType, userId] : [contentId, contentType, ipAddress];
+      
+      db.get(query, params, (err, row) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        
+        // If no watch record found, add new watch count
+        if (!row) {
+          db.run(
+            'INSERT INTO watch_counts (content_id, content_type, user_id, ip_address) VALUES (?, ?, ?, ?)',
+            [contentId, contentType, userId, ipAddress],
+            (err) => {
+              if (err) reject(err);
+              else resolve({ updated: true });
+            }
+          );
+        } else {
+          resolve({ updated: false });
+        }
+      });
+    });
+  },
+
+  // Get watch count for a specific content
+  getWatchCount: (contentId, contentType) => {
+    return new Promise((resolve, reject) => {
+      db.get(
+        'SELECT COUNT(DISTINCT CASE WHEN user_id IS NOT NULL THEN user_id ELSE ip_address END) as count FROM watch_counts WHERE content_id = ? AND content_type = ?',
+        [contentId, contentType],
+        (err, row) => {
+          if (err) reject(err);
+          else resolve(row ? row.count : 0);
+        }
+      );
+    });
+  },
+
+  // Get watch counts for multiple content items
+  getWatchCounts: (contentType, contentIds) => {
+    return new Promise((resolve, reject) => {
+      if (!contentIds.length) {
+        resolve({});
+        return;
+      }
+
+      const placeholders = contentIds.map(() => '?').join(',');
+      const query = `
+        SELECT content_id, COUNT(DISTINCT CASE WHEN user_id IS NOT NULL THEN user_id ELSE ip_address END) as count 
+        FROM watch_counts 
+        WHERE content_type = ? AND content_id IN (${placeholders})
+        GROUP BY content_id
+      `;
+
+      db.all(query, [contentType, ...contentIds], (err, rows) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        const counts = {};
+        rows.forEach(row => {
+          counts[row.content_id] = row.count;
+        });
+        resolve(counts);
+      });
+    });
+  }
+};
+
+// Add watchCountOperations to the exported object
+module.exports = {
+  ...db_ops,
+  ...watchCountOperations
+};

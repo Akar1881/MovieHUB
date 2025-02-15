@@ -16,6 +16,8 @@ MovieHUB is a powerful and feature-rich movie and TV show streaming platform bui
 - 🛡️ Admin panel for content management
 - 📱 Mobile-friendly design
 - 👥 Credits system for technicians, designers, and translators
+- 👁️ Watch count tracking system
+- 🌐 Social media integration
 
 ## Tech Stack 🛠️
 
@@ -80,9 +82,17 @@ The application uses a `config.json` file for configuration. Create it in the ro
       "height": 1809
     },
     "allowedTypes": ["image/jpeg", "image/png"]
+  },
+  "social": {
+    "telegram": "https://t.me/moviehub",
+    "facebook": "https://facebook.com/moviehub",
+    "instagram": "https://instagram.com/moviehub",
+    "contact": "mailto:contact@moviehub.com"
   }
 }
 ```
+
+To disable any social media link, set its value to "null" in the config.
 
 ## Project Structure 📁
 
@@ -123,11 +133,13 @@ moviehub/
    - Search by title
    - Filter by genre, type, and rating
    - Sort by various criteria
+   - Track view counts for popular content
 
 2. **Watch Content**
    - Multiple streaming servers
    - Continue watching feature
    - Full-screen mode
+   - View count tracking
 
 3. **User Features**
    - Create an account

@@ -4,8 +4,21 @@ const db = require('../database');
 
 // List all movies
 router.get('/', async (req, res) => {
-  const movies = await db.getAllMovies();
-  res.render('movies/index', { movies });
+  try {
+    const movies = await db.getAllMovies();
+    const movieIds = movies.map(movie => movie.id);
+    const watchCounts = await db.getWatchCounts('movie', movieIds);
+    
+    // Add watch counts to movie objects
+    movies.forEach(movie => {
+      movie.watchCount = watchCounts[movie.id] || 0;
+    });
+    
+    res.render('movies/index', { movies });
+  } catch (err) {
+    console.error('Error fetching movies:', err);
+    res.render('movies/index', { movies: [], error: 'Failed to load movies' });
+  }
 });
 
 // Show single movie
@@ -15,6 +28,7 @@ router.get('/:id', async (req, res) => {
     const servers = await db.getMovieServers(req.params.id);
     const reviews = await db.getMovieReviews(req.params.id);
     const credits = await db.getCredits(req.params.id, 'movie');
+    const watchCount = await db.getWatchCount(req.params.id, 'movie');
     let isFavorite = false;
     let hasReviewed = false;
 
@@ -25,10 +39,37 @@ router.get('/:id', async (req, res) => {
       ]);
     }
 
-    res.render('movies/show', { movie, servers, reviews, credits, isFavorite, hasReviewed });
+    res.render('movies/show', { 
+      movie, 
+      servers, 
+      reviews, 
+      credits, 
+      isFavorite, 
+      hasReviewed,
+      watchCount
+    });
   } catch (err) {
     console.error('Movie details error:', err);
     res.redirect('/movies');
+  }
+});
+
+// Record watch count
+router.post('/:id/watch', async (req, res) => {
+  try {
+      const userId = req.session.user ? req.session.user.id : null;
+      const ipAddress = req.ip;
+      
+      const result = await db.addWatchCount(req.params.id, 'movie', userId, ipAddress);
+      if (result.updated) {
+          const newCount = await db.getWatchCount(req.params.id, 'movie');
+          res.json({ updated: true, newCount });
+      } else {
+          res.json({ updated: false });
+      }
+  } catch (err) {
+      console.error('Error recording watch count:', err);
+      res.status(500).json({ error: 'Failed to record watch' });
   }
 });
 

@@ -35,6 +35,16 @@ app.use(session({
     cookie: { secure: false }
 }));
 
+// Format count helper function
+app.locals.formatCount = (count) => {
+    if (count >= 1000000) {
+        return (count / 1000000).toFixed(1) + 'M';
+    } else if (count >= 1000) {
+        return (count / 1000).toFixed(1) + 'K';
+    }
+    return count.toString();
+};
+
 // Global variables middleware
 app.use((req, res, next) => {
     res.locals.config = config;

@@ -5,9 +5,14 @@
     <div class="tvshow-details">
         <div class="tvshow-poster">
             <img src="<%= tvshow.poster %>" alt="<%= tvshow.title %>">
+            <div class="watch-count">
+                <i class="fas fa-eye"></i>
+                <span id="watchCount"><%= watchCount %></span>
+            </div>
         </div>
         <div class="tvshow-info">
             <h1><%= tvshow.title %></h1>
+          
 
             <% if (user) { %>
                 <button id="favoriteBtn" class="favorite-btn" onclick="toggleFavorite()">
@@ -319,6 +324,31 @@
     border-radius: 4px;
     font-size: 0.9rem;
 }
+
+.tvshow-poster {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.watch-count {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 8px 16px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--primary);
+}
+
+.watch-count i {
+    font-size: 1.1rem;
+}
 </style>
 
 <script>
@@ -370,11 +400,36 @@ episodeSelect.addEventListener('change', async function() {
     }
 });
 
-serverSelect.addEventListener('change', function() {
+serverSelect.addEventListener('change', async function() {
     const embedUrl = this.value;
     if (embedUrl) {
         episodePlayer.innerHTML = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
         episodePlayer.style.display = 'block';
+        
+        // Start 15-minute timer for watch count
+        let watchTimer = setTimeout(async () => {
+            try {
+                const response = await fetch(`/tvshows/<%= tvshow.id %>/watch`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.updated) {
+                        // Update watch count display
+                        const watchCountElement = document.getElementById('watchCount');
+                        watchCountElement.textContent = data.newCount;
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to record watch:', err);
+            }
+        }, 15 * 60 * 1000); // 15 minutes
+
+        // Clear timer if user changes server or leaves page
+        window.onbeforeunload = () => {
+            clearTimeout(watchTimer);
+        };
     } else {
         episodePlayer.style.display = 'none';
     }

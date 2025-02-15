@@ -17,6 +17,35 @@
                         <% } %>
                     </ul>
                 </div>
+                <div class="footer-section">
+                    <h3>Connect With Us</h3>
+                    <div class="social-links">
+                        <% if (config.social.telegram && config.social.telegram !== "null") { %>
+                            <a href="<%= config.social.telegram %>" target="_blank" class="social-link">
+                                <i class="fab fa-telegram"></i>
+                                <span>Telegram</span>
+                            </a>
+                        <% } %>
+                        <% if (config.social.facebook && config.social.facebook !== "null") { %>
+                            <a href="<%= config.social.facebook %>" target="_blank" class="social-link">
+                                <i class="fab fa-facebook"></i>
+                                <span>Facebook</span>
+                            </a>
+                        <% } %>
+                        <% if (config.social.instagram && config.social.instagram !== "null") { %>
+                            <a href="<%= config.social.instagram %>" target="_blank" class="social-link">
+                                <i class="fab fa-instagram"></i>
+                                <span>Instagram</span>
+                            </a>
+                        <% } %>
+                        <% if (config.social.contact && config.social.contact !== "null") { %>
+                            <a href="<%= config.social.contact %>" class="social-link">
+                                <i class="fas fa-envelope"></i>
+                                <span>Contact Us</span>
+                            </a>
+                        <% } %>
+                    </div>
+                </div>
             </div>
             <div class="footer-bottom">
                 <p>&copy; <%= new Date().getFullYear() %> <%= config.site.name %>. All rights reserved.</p>

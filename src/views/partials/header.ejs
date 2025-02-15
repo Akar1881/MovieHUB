@@ -10,35 +10,37 @@
 <body>
     <header class="header">
         <nav class="nav-menu">
-            <div class="search-container">
-                <i class="fas fa-search search-icon" id="headerSearchIcon"></i>
-                <div class="search-bar" id="headerSearchBar">
-                    <input type="text" class="search-input" id="headerSearchInput" placeholder="Search movies and TV shows...">
-                    <div class="search-results" id="headerSearchResults">
-                        <div class="search-section">
-                            <h3>Movies</h3>
-                            <div id="headerMovieResults"></div>
-                        </div>
-                        <div class="search-section">
-                            <h3>TV Shows</h3>
-                            <div id="headerTvshowResults"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
             <div class="logo">
                 <a href="/">
                     <img src="/images/logo.png" alt="<%= config.site.name %>">
                 </a>
             </div>
             
-            <div class="user-info">
-                <% if (user) { %>
-                    <span class="login-button"><%= user.username %></span>
-                <% } else { %>
-                    <a href="/auth/login" class="login-button">Login</a>
-                <% } %>
+            <div class="header-right">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon" id="headerSearchIcon"></i>
+                    <div class="search-bar" id="headerSearchBar">
+                        <input type="text" class="search-input" id="headerSearchInput" placeholder="Search movies and TV shows...">
+                        <div class="search-results" id="headerSearchResults">
+                            <div class="search-section">
+                                <h3>Movies</h3>
+                                <div id="headerMovieResults"></div>
+                            </div>
+                            <div class="search-section">
+                                <h3>TV Shows</h3>
+                                <div id="headerTvshowResults"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="user-info">
+                    <% if (user) { %>
+                        <span class="login-button"><%= user.username %></span>
+                    <% } else { %>
+                        <a href="/auth/login" class="login-button">Login</a>
+                    <% } %>
+                </div>
             </div>
         </nav>
     </header>

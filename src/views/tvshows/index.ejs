@@ -10,6 +10,7 @@
                 <option value="latest">Latest</option>
                 <option value="oldest">Oldest</option>
                 <option value="rating">Highest Rated</option>
+                <option value="views">Most Viewed</option>
             </select>
             <select id="seasons-select" class="filter-select">
                 <option value="all">All Seasons</option>
@@ -33,18 +34,21 @@
         <% tvshows.forEach(tvshow => { %>
             <div class="content-card" 
                  data-rating="<%= tvshow.avgRating || 0 %>" 
+                 data-views="<%= tvshow.watchCount || 0 %>"
                  data-date="<%= tvshow.created_at %>"
                  data-seasons="<%= tvshow.seasons %>"
                  data-genres="<%= tvshow.genres %>"
                  data-title="<%= tvshow.title.toLowerCase() %>">
                 <a href="/tvshows/<%= tvshow.id %>">
                     <img src="<%= tvshow.poster %>" alt="<%= tvshow.title %>">
-                    <% if (tvshow.avgRating > 0) { %>
-                      <div class="rating-badge">
+                    <div class="rating-badge">
                         <i class="fas fa-star"></i>
-                        <%= tvshow.avgRating.toFixed(1) %>
-                      </div>
-                    <% } %>
+                        <%= tvshow.avgRating ? tvshow.avgRating.toFixed(1) : '0.0' %>
+                    </div>
+                    <div class="watch-badge">
+                        <i class="fas fa-eye"></i>
+                        <%= formatCount(tvshow.watchCount || 0) %>
+                    </div>
                     <div class="content-title"><%= tvshow.title %></div>
                 </a>
             </div>
@@ -53,6 +57,26 @@
 </div>
 
 <style>
+.watch-badge {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    background: rgba(0, 0, 0, 0.8);
+    color: var(--primary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-width: 60px;
+    justify-content: center;
+}
+
+.watch-badge i {
+    font-size: 0.875rem;
+}
+
 .filter-select {
     background-color: var(--secondary);
     color: var(--primary);
@@ -121,6 +145,8 @@ function filterAndSortContent() {
             return new Date(a.dataset.date) - new Date(b.dataset.date);
         } else if (sortBy === 'rating') {
             return parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating);
+        } else if (sortBy === 'views') {
+            return parseInt(b.dataset.views) - parseInt(a.dataset.views);
         }
     });
     

@@ -4,8 +4,21 @@ const db = require('../database');
 
 // List all TV shows
 router.get('/', async (req, res) => {
-  const tvshows = await db.getAllTVShows();
-  res.render('tvshows/index', { tvshows });
+  try {
+    const tvshows = await db.getAllTVShows();
+    const tvshowIds = tvshows.map(show => show.id);
+    const watchCounts = await db.getWatchCounts('tvshow', tvshowIds);
+    
+    // Add watch counts to tvshow objects
+    tvshows.forEach(show => {
+      show.watchCount = watchCounts[show.id] || 0;
+    });
+    
+    res.render('tvshows/index', { tvshows });
+  } catch (err) {
+    console.error('Error fetching TV shows:', err);
+    res.render('tvshows/index', { tvshows: [], error: 'Failed to load TV shows' });
+  }
 });
 
 // Show single TV show
@@ -15,6 +28,7 @@ router.get('/:id', async (req, res) => {
     const episodes = await db.getTVShowEpisodes(req.params.id);
     const reviews = await db.getTVShowReviews(req.params.id);
     const credits = await db.getCredits(req.params.id, 'tvshow');
+    const watchCount = await db.getWatchCount(req.params.id, 'tvshow');
     let isFavorite = false;
     let hasReviewed = false;
 
@@ -25,10 +39,37 @@ router.get('/:id', async (req, res) => {
       ]);
     }
 
-    res.render('tvshows/show', { tvshow, episodes, reviews, credits, isFavorite, hasReviewed });
+    res.render('tvshows/show', { 
+      tvshow, 
+      episodes, 
+      reviews, 
+      credits, 
+      isFavorite, 
+      hasReviewed,
+      watchCount
+    });
   } catch (err) {
     console.error('TV show details error:', err);
     res.redirect('/tvshows');
+  }
+});
+
+// Record watch count
+router.post('/:id/watch', async (req, res) => {
+  try {
+      const userId = req.session.user ? req.session.user.id : null;
+      const ipAddress = req.ip;
+      
+      const result = await db.addWatchCount(req.params.id, 'tvshow', userId, ipAddress);
+      if (result.updated) {
+          const newCount = await db.getWatchCount(req.params.id, 'tvshow');
+          res.json({ updated: true, newCount });
+      } else {
+          res.json({ updated: false });
+      }
+  } catch (err) {
+      console.error('Error recording watch count:', err);
+      res.status(500).json({ error: 'Failed to record watch' });
   }
 });
 

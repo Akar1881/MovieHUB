@@ -21,5 +21,11 @@
       "height": 1809
     },
     "allowedTypes": ["image/jpeg", "image/png"]
+  },
+  "social": {
+    "telegram": "https://t.me/moviehub",
+    "facebook": "https://facebook.com/moviehub",
+    "instagram": "https://instagram.com/moviehub",
+    "contact": "mailto:contact@moviehub.com"
   }
 }
