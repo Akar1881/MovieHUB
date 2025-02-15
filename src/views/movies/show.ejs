@@ -355,8 +355,13 @@ document.getElementById('server-select').addEventListener('change', async functi
         const serverElement = document.getElementById('server-' + selectedServer);
         serverElement.style.display = 'block';
         
+        // Clear any existing timer
+        if (window.watchTimer) {
+            clearTimeout(window.watchTimer);
+        }
+        
         // Start 15-minute timer for watch count
-        let watchTimer = setTimeout(async () => {
+        window.watchTimer = setTimeout(async () => {
             try {
                 const response = await fetch(`/movies/<%= movie.id %>/watch`, {
                     method: 'POST'
@@ -374,11 +379,13 @@ document.getElementById('server-select').addEventListener('change', async functi
                 console.error('Failed to record watch:', err);
             }
         }, 15 * 60 * 1000); // 15 minutes
+    }
+});
 
-        // Clear timer if user changes server or leaves page
-        window.onbeforeunload = () => {
-            clearTimeout(watchTimer);
-        };
+// Add cleanup when user leaves page
+window.addEventListener('beforeunload', () => {
+    if (window.watchTimer) {
+        clearTimeout(window.watchTimer);
     }
 });
 

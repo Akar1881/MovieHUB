@@ -406,8 +406,13 @@ serverSelect.addEventListener('change', async function() {
         episodePlayer.innerHTML = `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
         episodePlayer.style.display = 'block';
         
+        // Clear any existing timer
+        if (window.watchTimer) {
+            clearTimeout(window.watchTimer);
+        }
+        
         // Start 15-minute timer for watch count
-        let watchTimer = setTimeout(async () => {
+        window.watchTimer = setTimeout(async () => {
             try {
                 const response = await fetch(`/tvshows/<%= tvshow.id %>/watch`, {
                     method: 'POST'
@@ -425,13 +430,18 @@ serverSelect.addEventListener('change', async function() {
                 console.error('Failed to record watch:', err);
             }
         }, 15 * 60 * 1000); // 15 minutes
-
-        // Clear timer if user changes server or leaves page
-        window.onbeforeunload = () => {
-            clearTimeout(watchTimer);
-        };
     } else {
         episodePlayer.style.display = 'none';
+        if (window.watchTimer) {
+            clearTimeout(window.watchTimer);
+        }
+    }
+});
+
+// Add cleanup when user leaves page
+window.addEventListener('beforeunload', () => {
+    if (window.watchTimer) {
+        clearTimeout(window.watchTimer);
     }
 });
 

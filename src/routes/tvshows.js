@@ -57,19 +57,19 @@ router.get('/:id', async (req, res) => {
 // Record watch count
 router.post('/:id/watch', async (req, res) => {
   try {
-      const userId = req.session.user ? req.session.user.id : null;
-      const ipAddress = req.ip;
-      
-      const result = await db.addWatchCount(req.params.id, 'tvshow', userId, ipAddress);
-      if (result.updated) {
-          const newCount = await db.getWatchCount(req.params.id, 'tvshow');
-          res.json({ updated: true, newCount });
-      } else {
-          res.json({ updated: false });
-      }
+    const userId = req.session.user ? req.session.user.id : null;
+    const ipAddress = req.ip;
+    
+    const result = await db.addWatchCount(req.params.id, 'tvshow', userId, ipAddress);
+    if (result.updated) {
+      const newCount = await db.getWatchCount(req.params.id, 'tvshow');
+      res.json({ updated: true, newCount });
+    } else {
+      res.json({ updated: false });
+    }
   } catch (err) {
-      console.error('Error recording watch count:', err);
-      res.status(500).json({ error: 'Failed to record watch' });
+    console.error('Error recording watch count:', err);
+    res.status(500).json({ error: 'Failed to record watch' });
   }
 });
 
