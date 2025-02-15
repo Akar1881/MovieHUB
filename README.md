@@ -42,17 +42,12 @@ MovieHUB is a powerful and feature-rich movie and TV show streaming platform bui
    npm install
    ```
 
-3. Create necessary directories:
-   ```bash
-   mkdir -p database public/uploads
-   ```
-
-4. Start the development server:
+3. Start the development server:
    ```bash
    npm run dev
    ```
 
-5. Visit `http://localhost:3000` in your browser
+4. Visit `http://localhost:3000` in your browser
 
 ## Environment Setup 🔧
 
