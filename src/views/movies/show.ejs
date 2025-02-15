@@ -48,21 +48,18 @@
                     <span class="meta-label">Runtime:</span>
                     <span class="meta-value"><%= movie.runtime %></span>
                 </div>
-            </div>
-
-            <p class="movie-description"><%= movie.description %></p>
-            
-            <!-- Credits Section -->
-            <div class="movie-credits">
+                
+                <!-- Credits Section -->
                 <% if (credits) { %>
                     <!-- Technicians -->
                     <% const technicians = credits.filter(c => c.role === 'technician'); %>
                     <% if (technicians.length > 0) { %>
-                        <div class="credits-group">
-                            <h3>Technicians</h3>
-                            <div class="credits-list">
-                                <% technicians.forEach(tech => { %>
+                        <div class="meta-item credits-item">
+                            <span class="meta-label">Technicians:</span>
+                            <div class="credits-scroll">
+                                <% technicians.forEach((tech, index) => { %>
                                     <span class="credit-name"><%= tech.name %></span>
+                                    <%= index < technicians.length - 1 ? ',' : '' %>
                                 <% }); %>
                             </div>
                         </div>
@@ -71,11 +68,12 @@
                     <!-- Poster Designers -->
                     <% const designers = credits.filter(c => c.role === 'poster_designer'); %>
                     <% if (designers.length > 0) { %>
-                        <div class="credits-group">
-                            <h3>Poster Designers</h3>
-                            <div class="credits-list">
-                                <% designers.forEach(designer => { %>
+                        <div class="meta-item credits-item">
+                            <span class="meta-label">Poster Designers:</span>
+                            <div class="credits-scroll">
+                                <% designers.forEach((designer, index) => { %>
                                     <span class="credit-name"><%= designer.name %></span>
+                                    <%= index < designers.length - 1 ? ',' : '' %>
                                 <% }); %>
                             </div>
                         </div>
@@ -84,17 +82,20 @@
                     <!-- Translators -->
                     <% const translators = credits.filter(c => c.role === 'translator'); %>
                     <% if (translators.length > 0) { %>
-                        <div class="credits-group">
-                            <h3>Translators</h3>
-                            <div class="credits-list">
-                                <% translators.forEach(translator => { %>
+                        <div class="meta-item credits-item">
+                            <span class="meta-label">Translators:</span>
+                            <div class="credits-scroll">
+                                <% translators.forEach((translator, index) => { %>
                                     <span class="credit-name"><%= translator.name %></span>
+                                    <%= index < translators.length - 1 ? ',' : '' %>
                                 <% }); %>
                             </div>
                         </div>
                     <% } %>
                 <% } %>
             </div>
+
+            <p class="movie-description"><%= movie.description %></p>
             
             <div class="movie-servers">
                 <h3>Watch Online</h3>
