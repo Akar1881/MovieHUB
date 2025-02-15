@@ -333,8 +333,7 @@ router.get('/tvshows/edit/:id', isAdmin, async (req, res) => {
       episode.servers = await db.getEpisodeServers(episode.id);
     }
     
-    tvshow.credits = credits;
-    res.render('admin/edit-tvshow', { tvshow, episodes });
+    res.render('admin/edit-tvshow', { tvshow, episodes, credits });
   } catch (err) {
     console.error('Edit TV show form error:', err);
     res.redirect('/admin');
@@ -436,10 +435,10 @@ router.post('/tvshows/edit/:id', isAdmin, upload.single('poster'), async (req, r
       for (const episode of episodes) {
         episode.servers = await db.getEpisodeServers(episode.id);
       }
-      tvshow.credits = credits;
       res.render('admin/edit-tvshow', { 
         tvshow, 
-        episodes, 
+        episodes,
+        credits,
         error: 'Failed to update TV show: ' + err.message 
       });
     } catch (renderErr) {

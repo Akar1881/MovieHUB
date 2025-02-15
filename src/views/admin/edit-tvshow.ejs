@@ -81,9 +81,18 @@
       <div class="credit-group">
         <h4>Technicians</h4>
         <div id="technicians-container" class="credits-container">
-          <div class="credit-entry">
-            <input type="text" name="credits[technician][]" placeholder="Technician name" required>
-          </div>
+          <% const technicians = credits.filter(c => c.role === 'technician'); %>
+          <% if (technicians.length > 0) { %>
+            <% technicians.forEach(tech => { %>
+              <div class="credit-entry">
+                <input type="text" name="credits[technician][]" value="<%= tech.name %>" placeholder="Technician name" required>
+              </div>
+            <% }); %>
+          <% } else { %>
+            <div class="credit-entry">
+              <input type="text" name="credits[technician][]" placeholder="Technician name" required>
+            </div>
+          <% } %>
         </div>
         <button type="button" class="btn btn-small" onclick="addCredit('technicians')">Add Technician</button>
         <button type="button" class="btn btn-small btn-danger" onclick="removeLastCredit('technicians')">Remove Last</button>
@@ -93,9 +102,18 @@
       <div class="credit-group">
         <h4>Poster Designers</h4>
         <div id="designers-container" class="credits-container">
-          <div class="credit-entry">
-            <input type="text" name="credits[poster_designer][]" placeholder="Designer name" required>
-          </div>
+          <% const designers = credits.filter(c => c.role === 'poster_designer'); %>
+          <% if (designers.length > 0) { %>
+            <% designers.forEach(designer => { %>
+              <div class="credit-entry">
+                <input type="text" name="credits[poster_designer][]" value="<%= designer.name %>" placeholder="Designer name" required>
+              </div>
+            <% }); %>
+          <% } else { %>
+            <div class="credit-entry">
+              <input type="text" name="credits[poster_designer][]" placeholder="Designer name" required>
+            </div>
+          <% } %>
         </div>
         <button type="button" class="btn btn-small" onclick="addCredit('designers')">Add Designer</button>
         <button type="button" class="btn btn-small btn-danger" onclick="removeLastCredit('designers')">Remove Last</button>
@@ -105,15 +123,25 @@
       <div class="credit-group">
         <h4>Translators</h4>
         <div id="translators-container" class="credits-container">
-          <div class="credit-entry">
-            <input type="text" name="credits[translator][]" placeholder="Translator name" required>
-          </div>
+          <% const translators = credits.filter(c => c.role === 'translator'); %>
+          <% if (translators.length > 0) { %>
+            <% translators.forEach(translator => { %>
+              <div class="credit-entry">
+                <input type="text" name="credits[translator][]" value="<%= translator.name %>" placeholder="Translator name" required>
+              </div>
+            <% }); %>
+          <% } else { %>
+            <div class="credit-entry">
+              <input type="text" name="credits[translator][]" placeholder="Translator name" required>
+            </div>
+          <% } %>
         </div>
         <button type="button" class="btn btn-small" onclick="addCredit('translators')">Add Translator</button>
         <button type="button" class="btn btn-small btn-danger" onclick="removeLastCredit('translators')">Remove Last</button>
       </div>
     </div>
     
+    <!-- Episodes Section -->
     <div id="episodes-container">
       <h3>Episodes</h3>
       <div class="seasons-tabs">
@@ -173,6 +201,147 @@
     <button type="submit" class="btn">Update TV Show</button>
   </form>
 </div>
+
+<style>
+.genres-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.genre-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.genre-checkbox input {
+  width: auto;
+}
+
+.current-poster {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.btn-danger {
+  background-color: #dc2626;
+}
+
+.btn-danger:hover {
+  background-color: #b91c1c;
+}
+
+.seasons-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.season-tab {
+  padding: 0.5rem 1rem;
+  background-color: var(--secondary);
+  border: 1px solid var(--primary);
+  color: var(--text);
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.season-tab.active {
+  background-color: var(--primary);
+  color: var(--secondary);
+}
+
+.season-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.season-episodes {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.episode-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.episode-entry {
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.credits-section {
+  margin: 2rem 0;
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.credit-group {
+  margin-bottom: 1.5rem;
+}
+
+.credit-group h4 {
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+
+.credits-container {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+  padding-right: 1rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) rgba(255, 255, 255, 0.1);
+}
+
+.credits-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.credits-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.credits-container::-webkit-scrollbar-thumb {
+  background-color: var(--primary);
+  border-radius: 4px;
+}
+
+.credit-entry {
+  margin-bottom: 0.5rem;
+}
+
+.credit-entry input {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: var(--text);
+}
+
+.btn-small {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  margin-right: 0.5rem;
+}
+</style>
 
 <script>
 let episodeCount = <%= episodes.length %>;
@@ -350,147 +519,5 @@ function checkGenreLimit(checkbox) {
 // Show first season by default
 showSeason(1);
 </script>
-
-<style>
-.genres-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-.genre-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--text);
-  cursor: pointer;
-}
-
-.genre-checkbox input {
-  width: auto;
-}
-
-.current-poster {
-  margin-top: 0.5rem;
-  padding: 0.5rem;
-  background-color: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
-}
-
-.btn-danger {
-  background-color: #dc2626;
-}
-
-.btn-danger:hover {
-  background-color: #b91c1c;
-}
-
-.seasons-tabs {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-}
-
-.season-tab {
-  padding: 0.5rem 1rem;
-  background-color: var(--secondary);
-  border: 1px solid var(--primary);
-  color: var(--text);
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.season-tab.active {
-  background-color: var(--primary);
-  color: var(--secondary);
-}
-
-.season-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.season-episodes {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.episode-actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-.episode-entry {
-  background-color: rgba(255, 255, 255, 0.05);
-  padding: 1rem;
-  border-radius: 4px;
-  margin-bottom: 1rem;
-}
-
-.credits-section {
-  margin: 2rem 0;
-  padding: 1rem;
-  background-color: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-}
-
-.credit-group {
-  margin-bottom: 1.5rem;
-}
-
-.credit-group h4 {
-  color: var(--primary);
-  margin-bottom: 1rem;
-}
-
-.credits-container {
-  max-height: 200px;
-  overflow-y: auto;
-  margin-bottom: 1rem;
-  padding-right: 1rem;
-  scrollbar-width: thin;
-  scrollbar-color: var(--primary) rgba(255, 255, 255, 0.1);
-}
-
-.credits-container::-webkit-scrollbar {
-  width: 8px;
-}
-
-.credits-container::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-}
-
-.credits-container::-webkit-scrollbar-thumb {
-  background-color: var(--primary);
-  border-radius: 4px;
-}
-
-.credit-entry {
-  margin-bottom .credit-entry {
-  margin-bottom: 0.5rem;
-}
-
-.credit-entry input {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  color: var(--text);
-}
-
-.btn-small {
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-  margin-right: 0.5rem;
-}
-</style>
 
 <%- include('../partials/footer') %>

@@ -1,3 +1,2 @@
-// run `node index.js` in the terminal
-
-console.log(`Hello Node.js v${process.versions.node}!`);
+// Import and run the main application
+require('./src/index.js');
