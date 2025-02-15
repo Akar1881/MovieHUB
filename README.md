@@ -33,7 +33,7 @@ MovieHUB is a powerful and feature-rich movie and TV show streaming platform bui
 
 1. Clone the repository:
    ```bash
-   git clone https://https://github.com/Akar1881/MovieHUB.git
+   git clone https://github.com/Akar1881/MovieHUB.git
    cd moviehub
    ```
 
