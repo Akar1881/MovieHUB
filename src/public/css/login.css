@@ -1,70 +1,110 @@
 /* Login page styles */
+:root {
+  --form-width: min(400px, 90%);
+  --input-height: 50px;
+  --border-radius: 12px;
+  --transition: all 0.3s ease;
+}
+
 .form-container {
-  max-width: 400px;
+  width: var(--form-width);
   margin: 2rem auto;
-  padding: 2rem;
+  padding: 2.5rem 2rem;
   background-color: var(--secondary);
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: var(--border-radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.form-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--primary);
 }
 
 .form-container h2 {
   color: var(--primary);
   text-align: center;
-  margin-bottom: 1.5rem;
-  font-size: 1.8rem;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
 .form-group {
   margin-bottom: 1.5rem;
+  position: relative;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
   color: var(--text);
   font-weight: 500;
+  font-size: 0.95rem;
+  transition: var(--transition);
 }
 
 .form-group input {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  height: var(--input-height);
+  padding: 0 1.25rem;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius);
   background-color: rgba(255, 255, 255, 0.05);
   color: var(--text);
   font-size: 1rem;
-  transition: border-color 0.3s ease;
+  transition: var(--transition);
 }
 
 .form-group input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+  background-color: rgba(255, 215, 0, 0.05);
+}
+
+.form-group input:focus + label {
+  color: var(--primary);
 }
 
 .btn {
   width: 100%;
-  padding: 0.75rem;
+  height: var(--input-height);
   background-color: var(--primary);
   color: var(--secondary);
   border: none;
-  border-radius: 4px;
+  border-radius: var(--border-radius);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: var(--transition);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .btn:hover {
   background-color: #e6c200;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2);
+}
+
+.btn:active {
+  transform: translateY(0);
 }
 
 .alert {
-  padding: 0.75rem;
-  margin-bottom: 1rem;
-  border-radius: 4px;
-  font-size: 0.9rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: var(--border-radius);
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .alert-error {
@@ -73,20 +113,86 @@
   border: 1px solid rgba(220, 38, 38, 0.2);
 }
 
+.alert-error::before {
+  content: '⚠️';
+}
+
 .form-container p {
   text-align: center;
-  margin-top: 1.5rem;
+  margin-top: 2rem;
   color: var(--text);
+  font-size: 0.95rem;
 }
 
 .form-container a {
   color: var(--primary);
   text-decoration: none;
   font-weight: 500;
-  transition: color 0.3s ease;
+  transition: var(--transition);
+  position: relative;
 }
 
-.form-container a:hover {
-  color: #e6c200;
-  text-decoration: underline;
+.form-container a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: var(--primary);
+  transform: scaleX(0);
+  transition: var(--transition);
+  transform-origin: right;
+}
+
+.form-container a:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Mobile Responsive Design */
+@media (max-width: 480px) {
+  .form-container {
+    padding: 2rem 1.5rem;
+    margin: 1rem auto;
+  }
+
+  .form-container h2 {
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+
+  .form-group label {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-group input {
+    height: 45px;
+    font-size: 0.95rem;
+  }
+
+  .btn {
+    height: 45px;
+    font-size: 0.95rem;
+  }
+}
+
+/* Dark mode optimization */
+@media (prefers-color-scheme: dark) {
+  .form-container {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* Touch device optimization */
+@media (hover: none) {
+  .btn:hover {
+    transform: none;
+    box-shadow: none;
+  }
 }
