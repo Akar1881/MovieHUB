@@ -48,57 +48,64 @@
   font-size: 0.9rem;
 }
 
+/* Improved episodes section */
 .tvshow-episodes {
-  margin-bottom: 2rem;
   background-color: var(--secondary);
-  padding: 1.5rem;
-  border-radius: 8px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 1.5rem;
+}
+
+.tvshow-episodes {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 215, 0, 0.2);
 }
 
 .tvshow-episodes h3 {
   color: var(--primary);
-  margin-bottom: 1.5rem;
-  font-size: 1.2rem;
+  margin-bottom: 1.9rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  padding-bottom: 0.85rem;
   border-bottom: 2px solid var(--primary);
-  padding-bottom: 0.5rem;
 }
 
 .episode-selector {
-  margin-bottom: 1rem;
-  display: flex;
+  padding: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
-  flex-wrap: wrap;
 }
 
-.episode-selector select {
-  flex: 1;
-  min-width: 200px;
-  padding: 0.75rem;
-  background-color: var(--secondary);
-  border: 1px solid var(--primary);
-  border-radius: 4px;
+.filter-select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: var(--background);
+  border: 2px solid var(--primary);
+  border-radius: 8px;
   color: var(--primary);
+  font-size: 1rem;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.episode-selector select:disabled {
+.filter-select:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.episode-selector select option {
-  background-color: var(--secondary);
-  color: var(--primary);
-  padding: 0.5rem;
+.filter-select:not(:disabled):hover {
+  background-color: rgba(255, 215, 0, 0.1);
 }
 
 .embed-container {
   position: relative;
   width: 100%;
-  padding-top: 56.25%; /* 16:9 Aspect Ratio */
+  padding-top: 56.25%;
   background-color: #000;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
+  margin-top: 1.5rem;
 }
 
 .embed-container iframe {
@@ -110,36 +117,36 @@
   border: none;
 }
 
-/* Reviews Styles */
 .tvshow-reviews {
-  background-color: var(--secondary);
-  padding: 1.5rem;
-  border-radius: 8px;
   margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: var(--secondary);
+  border-radius: 16px;
 }
 
 .tvshow-reviews h3 {
   color: var(--primary);
   margin-bottom: 1.5rem;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  padding-bottom: 0.75rem;
   border-bottom: 2px solid var(--primary);
-  padding-bottom: 0.5rem;
 }
 
 .review-form {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--background);
   padding: 1.5rem;
-  border-radius: 8px;
+  border-radius: 12px;
   margin-bottom: 2rem;
 }
 
 .review-form .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .review-form label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
   color: var(--text);
   font-weight: 500;
 }
@@ -147,74 +154,62 @@
 .review-form select,
 .review-form textarea {
   width: 100%;
-  padding: 0.75rem;
+  padding: 1rem;
   background-color: var(--secondary);
-  border: 1px solid var(--primary);
-  border-radius: 4px;
-  color: var(--primary);
+  border: 2px solid var(--primary);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 1rem;
+  transition: all 0.3s ease;
 }
 
-.review-form select option {
-  background-color: var(--secondary);
-  color: var(--primary);
+.review-form select:focus,
+.review-form textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
 }
 
 .review-form textarea {
-  min-height: 100px;
+  min-height: 120px;
   resize: vertical;
-  color: var(--text);
 }
 
 .review-form button {
-  padding: 0.75rem 1.5rem;
+  width: 100%;
+  padding: 1rem;
   background-color: var(--primary);
-  color: var(--secondary);
+  color: var(--background);
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  width: 100%;
+  transition: all 0.3s ease;
 }
 
 .review-form button:hover {
   background-color: #e6c200;
-}
-
-.reviews-container {
-  max-height: 500px;
-  overflow-y: auto;
-  padding-right: 1rem;
-  margin: 1rem 0;
-  scrollbar-width: thin;
-  scrollbar-color: var(--primary) var(--secondary);
-}
-
-.reviews-container::-webkit-scrollbar {
-  width: 8px;
-}
-
-.reviews-container::-webkit-scrollbar-track {
-  background: var(--secondary);
-}
-
-.reviews-container::-webkit-scrollbar-thumb {
-  background-color: var(--primary);
-  border-radius: 4px;
+  transform: translateY(-2px);
 }
 
 .reviews-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1rem;
+  gap: 1.5rem;
+  margin-top: 2rem;
 }
 
 .review {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--background);
   padding: 1.5rem;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 215, 0, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.review:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
 .review-header {
@@ -222,7 +217,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.75rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -233,28 +228,47 @@
 }
 
 .review-rating {
-  color: var(--primary);
   display: flex;
   align-items: center;
   gap: 0.25rem;
 }
 
 .review-comment {
-  margin-bottom: 1rem;
+  margin: 1rem 0;
   line-height: 1.6;
   color: var(--text);
+  font-size: 0.95rem;
 }
 
 .review-date {
   display: block;
   color: rgba(255, 255, 255, 0.6);
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   font-style: italic;
+  margin-top: 1rem;
 }
 
-@media (min-width: 768px) {
+.delete-review-btn {
+  background: none;
+  border: none;
+  color: #dc2626;
+  cursor: pointer;
+  padding: 0.5rem;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+  font-size: 1.1rem;
+}
+
+.delete-review-btn:hover {
+  opacity: 1;
+}
+
+/* Responsive Design */
+@media (min-width: 1024px) {
   .tvshow-details {
     grid-template-columns: 300px 1fr;
+    gap: 3rem;
+    padding: 2rem;
   }
 
   .tvshow-poster {
@@ -263,16 +277,92 @@
 }
 
 @media (max-width: 768px) {
-  .episode-selector {
+  .tvshow-details {
+    padding: 1rem;
+  }
+
+  .tvshow-header {
     flex-direction: column;
+    align-items: flex-start;
   }
-  
-  .episode-selector select {
-    width: 100%;
+
+  .tvshow-info h1 {
+    font-size: 1.75rem;
   }
-  
+
+  .meta-grid {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+
+  .credits-content {
+    grid-template-columns: 1fr;
+  }
+
+  .episode-selector {
+    grid-template-columns: 1fr;
+  }
+
+  .review-form {
+    padding: 1rem;
+  }
+
   .reviews-list {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .tvshow-info h1 {
+    font-size: 1.5rem;
+  }
+
+  .favorite-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .rating-display {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .filter-select,
+  .review-form select,
+  .review-form textarea {
+    padding: 0.75rem;
+  }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) {
+  .tvshow-poster:hover {
+    transform: none;
+  }
+
+  .favorite-btn:hover {
+    background-color: rgba(255, 215, 0, 0.1);
+    color: var(--primary);
+  }
+
+  .review:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .genre-tag:hover,
+  .credit-name:hover {
+    background-color: rgba(255, 215, 0, 0.1);
+    color: var(--primary);
+  }
+}
+@media (min-width: 768px) {
+  .tvshow-details {
+    grid-template-columns: 300px 1fr;
+  }
+
+  .tvshow-poster {
+    margin: 0;
   }
 }
 

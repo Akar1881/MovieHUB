@@ -59,113 +59,69 @@
   border: 1px solid #333333;
 }
 
-/* Content card styles */
+/* Content Grid */
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
 .content-card {
   position: relative;
   border-radius: 8px;
   overflow: hidden;
-  background-color: #333333;
-  transition: all 0.3s ease;
-  scroll-snap-align: start;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  width: 150px;
+  transition: transform 0.3s ease;
+  background-color: var(--secondary);
+  aspect-ratio: 2/3;
 }
 
 .content-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .content-card a {
   text-decoration: none;
-  color: #FFFFFF;
+  color: var(--text);
 }
 
 .content-card img {
-  width: 150px;
-  height: 225px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
 }
 
-.content-card:hover img {
-  transform: scale(1.05);
-}
-
-/* Card overlay elements */
 .content-title {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 0.75rem 0.5rem;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
-  color: #FFD700;
-  font-weight: 500;
-  font-size: 0.875rem;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.8);
+  color: var(--primary);
   text-align: center;
+  font-weight: bold;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: padding 0.3s ease;
 }
 
-.content-card:hover .content-title {
-  padding: 1rem 0.5rem;
-}
-
-/* Rating badge */
 .rating-badge {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
   background: rgba(0, 0, 0, 0.8);
-  color: #FFD700;
+  color: var(--primary);
   padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  border-radius: 4px;
+  font-weight: bold;
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  backdrop-filter: blur(4px);
-  transition: transform 0.3s ease;
-}
-
-.content-card:hover .rating-badge {
-  transform: scale(1.1);
 }
 
 .rating-badge i {
-  font-size: 0.75rem;
-}
-
-/* Watch count badge */
-.watch-badge {
-  position: absolute;
-  top: 0.5rem;
-  left: 0.5rem;
-  background: rgba(0, 0, 0, 0.8);
-  color: #FFD700;
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  min-width: 50px;
-  justify-content: center;
-  backdrop-filter: blur(4px);
-  transition: transform 0.3s ease;
-}
-
-.content-card:hover .watch-badge {
-  transform: scale(1.1);
-}
-
-.watch-badge i {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
 }
 
 /* Responsive design */
@@ -264,4 +220,25 @@
   .content-card:hover .watch-badge {
     transform: none;
   }
+}
+
+/* Watch count badge */
+.watch-badge {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    background: rgba(0, 0, 0, 0.8);
+    color: var(--primary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-width: 60px;
+    justify-content: center;
+}
+
+.watch-badge i {
+    font-size: 0.875rem;
 }

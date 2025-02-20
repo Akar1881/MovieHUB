@@ -1,78 +1,114 @@
 /* Profile page styles */
+:root {
+  --container-width: min(1200px, 95%);
+  --border-radius: 12px;
+  --transition: all 0.3s ease;
+}
+
 .profile-container {
-  max-width: 1200px;
+  width: var(--container-width);
   margin: 2rem auto;
   padding: 2rem;
   background-color: var(--secondary);
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: var(--border-radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--primary);
 }
 
 .profile-container h2 {
   color: var(--primary);
-  margin-bottom: 2rem;
-  font-size: 1.8rem;
   text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
 .profile-container h3 {
   color: var(--primary);
-  margin-bottom: 1.5rem;
+  margin: 2rem 0 1rem;
   font-size: 1.5rem;
+  font-weight: 600;
   border-bottom: 2px solid var(--primary);
   padding-bottom: 0.5rem;
 }
 
 .profile-info {
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
   background-color: rgba(255, 255, 255, 0.05);
-  padding: 2rem;
-  border-radius: 8px;
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .form-group {
   margin-bottom: 1.5rem;
+  position: relative;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
   color: var(--text);
   font-weight: 500;
+  font-size: 0.95rem;
+  transition: var(--transition);
 }
 
 .form-group input {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius);
   background-color: rgba(255, 255, 255, 0.05);
   color: var(--text);
   font-size: 1rem;
-  transition: border-color 0.3s ease;
+  transition: var(--transition);
 }
 
 .form-group input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+  background-color: rgba(255, 215, 0, 0.05);
 }
 
 .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.75rem 1.5rem;
   background-color: var(--primary);
   color: var(--secondary);
   border: none;
-  border-radius: 4px;
+  border-radius: var(--border-radius);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: var(--transition);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .btn:hover {
-  background-color: #e6c200;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2);
+}
+
+.btn:active {
+  transform: translateY(0);
 }
 
 .profile-tabs {
@@ -84,12 +120,18 @@
 .tab-button {
   padding: 0.75rem 1.5rem;
   background-color: rgba(255, 255, 255, 0.05);
-  border: none;
-  border-radius: 4px;
+  border: 1px solid var(--primary);
+  border-radius: var(--border-radius);
   color: var(--text);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: var(--transition);
+  flex: 1;
+  text-align: center;
+}
+
+.tab-button:hover {
+  background-color: rgba(255, 215, 0, 0.1);
 }
 
 .tab-button.active {
@@ -99,47 +141,43 @@
 
 .tab-content {
   display: none;
+  animation: fadeIn 0.3s ease;
 }
 
 .tab-content.active {
   display: block;
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .content-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 1.5rem;
-  max-height: 600px;
-  overflow-y: auto;
-  padding-right: 1rem;
-  scrollbar-width: thin;
-  scrollbar-color: var(--primary) rgba(255, 255, 255, 0.1);
-}
-
-.content-grid::-webkit-scrollbar {
-  width: 8px;
-}
-
-.content-grid::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-}
-
-.content-grid::-webkit-scrollbar-thumb {
-  background-color: var(--primary);
-  border-radius: 4px;
+  margin-top: 1.5rem;
 }
 
 .content-card {
   position: relative;
-  border-radius: 8px;
+  border-radius: var(--border-radius);
   overflow: hidden;
-  transition: transform 0.3s ease;
+  transition: var(--transition);
   background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .content-card:hover {
   transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
 .content-card a {
@@ -160,13 +198,13 @@
   right: 0;
   padding: 1rem;
   background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
-  color: var(--text);
 }
 
 .content-title {
   color: var(--primary);
   font-weight: bold;
   margin-bottom: 0.25rem;
+  font-size: 1.1rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -175,38 +213,27 @@
 .content-type {
   font-size: 0.875rem;
   opacity: 0.8;
+  color: var(--text);
 }
 
 .reviews-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
-  max-height: 600px;
-  overflow-y: auto;
-  padding-right: 1rem;
-  scrollbar-width: thin;
-  scrollbar-color: var(--primary) rgba(255, 255, 255, 0.1);
-}
-
-.reviews-grid::-webkit-scrollbar {
-  width: 8px;
-}
-
-.reviews-grid::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-}
-
-.reviews-grid::-webkit-scrollbar-thumb {
-  background-color: var(--primary);
-  border-radius: 4px;
+  margin-top: 1.5rem;
 }
 
 .review-card {
   background-color: rgba(255, 255, 255, 0.05);
   padding: 1.5rem;
-  border-radius: 8px;
+  border-radius: var(--border-radius);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: var(--transition);
+}
+
+.review-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
 .review-header {
@@ -214,7 +241,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.75rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -226,20 +253,23 @@
 .review-header h4 a {
   color: var(--primary);
   text-decoration: none;
+  transition: var(--transition);
 }
 
 .review-header h4 a:hover {
-  text-decoration: underline;
+  opacity: 0.8;
 }
 
 .rating {
   margin-bottom: 1rem;
+  color: var(--primary);
 }
 
 .review-comment {
   color: var(--text);
   margin-bottom: 1rem;
-  line-height: 1.5;
+  line-height: 1.6;
+  font-size: 0.95rem;
 }
 
 .review-date {
@@ -255,44 +285,101 @@
   color: rgba(255, 255, 255, 0.6);
   padding: 2rem;
   background-color: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 1.1rem;
 }
 
 .alert {
-  padding: 0.75rem;
-  margin-bottom: 1rem;
-  border-radius: 4px;
-  font-size: 0.9rem;
-}
-
-.alert-error {
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: var(--border-radius);
   background-color: rgba(220, 38, 38, 0.1);
   color: #ef4444;
   border: 1px solid rgba(220, 38, 38, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
+.alert::before {
+  content: '⚠️';
+}
+
+/* Mobile Responsive Design */
 @media (max-width: 768px) {
   .profile-container {
-    margin: 1rem;
-    padding: 1rem;
+    margin: 1rem auto;
+    padding: 1.5rem;
   }
-  
+
+  .profile-container h2 {
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+
   .profile-info {
     padding: 1rem;
   }
-  
+
   .profile-tabs {
     flex-direction: column;
   }
-  
-  .content-grid,
-  .reviews-grid {
+
+  .content-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
   }
-  
-  .review-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
+
+  .reviews-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .content-title {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-container {
+    padding: 1rem;
+  }
+
+  .profile-container h2 {
+    font-size: 1.5rem;
+  }
+
+  .form-group label {
+    font-size: 0.9rem;
+  }
+
+  .form-group input {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .tab-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .content-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  }
+}
+
+/* Touch device optimization */
+@media (hover: none) {
+  .btn:hover,
+  .content-card:hover,
+  .review-card:hover,
+  .tab-button:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .review-header h4 a:hover {
+    opacity: 1;
   }
 }
